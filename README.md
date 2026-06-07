@@ -1,59 +1,34 @@
 # Analisador SPED PISCOFINS
 
-Analisador de arquivos SPED Contribuições e Fiscal via DuckDB-WASM (tudo no navegador, sem servidor).
+Analisador de arquivos SPED Contribuições e Fiscal — tudo no navegador, sem instalar nada.
 
-## Acessar online
+## Usar
 
-https://mcs1985.github.io/analisador-sped
+1. Abra https://mcs1985.github.io/analisador-sped
+2. Arraste os arquivos .txt do SPED (ou a pasta inteira) para a tela
+3. Use os filtros para navegar
+4. Clique em "Baixar XLSX" para exportar
 
-## Como usar
+## Editar (no seu PC)
 
-1. Abra o link acima
-2. Arraste os arquivos .txt do SPED (ou a pasta inteira) para o dropzone
-3. Use os filtros para navegar pelos dados
-4. Exporte XLSX via botão "Baixar XLSX"
+1. Abra `D:\FERRAMENTAS_MCS_IA\analisador_sped.html` com qualquer editor de texto
+2. Edite, salve
 
-## Editar e publicar alterações
+## Publicar a alteração
 
-### No mesmo PC
+No PowerShell, cole:
 
 ```powershell
 cd D:\FERRAMENTAS_MCS_IA
 git add analisador_sped.html
-git commit -m "descrição da alteração"
+git commit -m "alteração"
 git push
 ```
 
-### Em outro PC
+Quando pedir senha, cole o token pessoal (não aparece nada enquanto digita, é normal).
 
-```powershell
-git clone https://github.com/MCS1985/analisador-sped.git
-cd analisador-sped
-```
+O site atualiza sozinho em ~1 minuto.
 
-Edite o arquivo `analisador_sped.html` e depois:
+## No PC do trabalho (ou qualquer outro)
 
-```powershell
-git add analisador_sped.html
-git commit -m "descrição da alteração"
-git push
-```
-
-O site atualiza automaticamente em ~1 minuto.
-
-### Primeira configuração (só uma vez)
-
-```powershell
-git config --global user.name "Seu Nome"
-git config --global user.email "seu@email.com"
-```
-
-### Resumo de comandos
-
-| Comando | O que faz |
-|---|---|
-| `git status` | Mostra arquivos modificados |
-| `git add analisador_sped.html` | Prepara o arquivo para commit |
-| `git commit -m "mensagem"` | Cria um commit |
-| `git push` | Envia as alterações para o GitHub |
-| `git pull` | Baixa alterações do GitHub (no outro PC) |
+Só abrir https://mcs1985.github.io/analisador-sped no navegador. Não precisa instalar nada, não precisa rodar PowerShell. É só um site.
