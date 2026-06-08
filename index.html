@@ -511,16 +511,12 @@ SELECT filename, g_c190,
 FROM _sped WHERE reg = 'C195';
 
 -- C500 (energia/água/comb. - parente C501/C505)
+-- Layout SPED v3.2.2: VL_DOC=c13, VL_ICMS=c20 (consistente em v015+)
 CREATE OR REPLACE TEMP TABLE _t_c500 AS
 SELECT t.filename, t.g_c500,
-       CASE WHEN COALESCE(TRY_CAST(h.cod_ver AS INTEGER), 0) >= 16
-            THEN num(t.c13) ELSE num(t.c10)
-       END AS vl_doc,
-       CASE WHEN COALESCE(TRY_CAST(h.cod_ver AS INTEGER), 0) >= 16
-            THEN num(t.c20) ELSE num(t.c11)
-       END AS vl_icms
+       num(t.c13) AS vl_doc,
+       num(t.c20) AS vl_icms
 FROM _sped t
-LEFT JOIN _t_0000 h ON t.filename = h.filename
 WHERE t.reg = 'C500';
 
 -- C501 (PIS C500)
