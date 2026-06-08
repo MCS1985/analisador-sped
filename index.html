@@ -365,6 +365,7 @@ CREATE OR REPLACE TEMP MACRO num(v) AS
 -- CNPJ: Contribuições em c09 (após hash e datas), Fiscal em c07
 CREATE OR REPLACE TEMP TABLE _t_0000 AS
 SELECT filename,
+       TRIM(c02) AS cod_ver,
        CASE
            WHEN LENGTH(REGEXP_REPLACE(c05,'[^0-9]','','g')) = 8 THEN TRIM(c05)
            ELSE TRIM(c07)
@@ -511,10 +512,16 @@ FROM _sped WHERE reg = 'C195';
 
 -- C500 (energia/água/comb. - parente C501/C505)
 CREATE OR REPLACE TEMP TABLE _t_c500 AS
-SELECT filename, g_c500,
-       num(c13)  AS vl_doc,
-       num(c20)  AS vl_icms
-FROM _sped WHERE reg = 'C500';
+SELECT t.filename, t.g_c500,
+       CASE WHEN COALESCE(TRY_CAST(h.cod_ver AS INTEGER), 0) >= 16
+            THEN num(t.c13) ELSE num(t.c10)
+       END AS vl_doc,
+       CASE WHEN COALESCE(TRY_CAST(h.cod_ver AS INTEGER), 0) >= 16
+            THEN num(t.c20) ELSE num(t.c11)
+       END AS vl_icms
+FROM _sped t
+LEFT JOIN _t_0000 h ON t.filename = h.filename
+WHERE t.reg = 'C500';
 
 -- C501 (PIS C500)
 CREATE OR REPLACE TEMP TABLE _t_c501 AS
@@ -2656,6 +2663,8 @@ function passaFiltroCredito(r){
   if (r.sentido !== 'Entrada') return true;
   const cst = String(r.cst || '').replace(/^0+/, '');
   if (!CST_CREDITOS.has(cst)) return false;
+  const nat = String(r.nat_bc || '').trim();
+  if (!nat || nat === 'N/A' || nat === '') return false;
   return true;
 }
 
