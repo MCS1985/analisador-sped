@@ -2984,6 +2984,8 @@ els.clearData.addEventListener('click', async () => {
   els.results.classList.remove('active');
   els.fileList.innerHTML = '';
   registrosPorOrigem = { 'CONTRIBUIÇÕES': new Set(), 'FISCAL': new Set() };
+  els.fileInput.value = '';
+  els.folderInput.value = '';
   applyFilters();
   showError('');
 });
