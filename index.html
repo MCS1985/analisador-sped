@@ -195,8 +195,12 @@ thead .summary-row td{border-top:none;border-bottom:2px solid var(--accent)}
     <div class="sticky-top">
       <div class="toolbar">
         <div class="filters">
-          <input type="text" id="filter-periodo" placeholder="Período (MM/AAAA)" list="list-periodo" maxlength="7" style="width:150px">
-          <datalist id="list-periodo"></datalist>
+          <select id="filter-periodo-ini" style="width:150px">
+            <option value="">Período início (todos)</option>
+          </select>
+          <select id="filter-periodo-fim" style="width:150px">
+            <option value="">Período fim (todos)</option>
+          </select>
 
           <select id="filter-origem" style="width:170px">
             <option value="">Sped Origem (todos)</option>
@@ -1846,7 +1850,8 @@ const els = {
   progressText: document.getElementById('progress-text'),
   error: document.getElementById('error'),
   results: document.getElementById('results'),
-  filterPeriodo: document.getElementById('filter-periodo'),
+  filterPeriodoIni: document.getElementById('filter-periodo-ini'),
+  filterPeriodoFim: document.getElementById('filter-periodo-fim'),
   filterOrigem: document.getElementById('filter-origem'),
   filterSituacao: document.getElementById('filter-situacao'),
   filterRegistro: document.getElementById('filter-registro'),
@@ -1856,7 +1861,7 @@ const els = {
   listNatBcCred: document.getElementById('list-nat-bc-cred'),
   filterCnpj: document.getElementById('filter-cnpj'),
   listCnpj: document.getElementById('list-cnpj'),
-  listPeriodo: document.getElementById('list-periodo'),
+
   listCfop: document.getElementById('list-cfop'),
   listCst: document.getElementById('list-cst'),
   clearFilters: document.getElementById('clear-filters'),
@@ -2302,7 +2307,8 @@ function populateFilters(){
   });
   fillSel(els.filterOrigem, origensOrdenadas);
   updateRegistroOptions();
-  fillList(els.listPeriodo, periodos);
+  fillSel(els.filterPeriodoIni, [...periodos].sort());
+  fillSel(els.filterPeriodoFim, [...periodos].sort());
   fillList(els.listCfop, cfops);
   fillList(els.listCst, csts);
   fillList(els.listCnpj, cnpjs);
@@ -2328,7 +2334,8 @@ function updateRegistroOptions(){
 }
 
 function updateNatBcCredOptions(){
-  const fPeriodo = els.filterPeriodo.value.trim();
+  const fPeriodoIni = els.filterPeriodoIni.value;
+  const fPeriodoFim = els.filterPeriodoFim.value;
   const fOrigem = els.filterOrigem.value;
   const fSit = els.filterSituacao.value;
   const fReg = els.filterRegistro.value;
@@ -2337,7 +2344,9 @@ function updateNatBcCredOptions(){
   const fCnpj = els.filterCnpj.value.trim().toLowerCase();
   const nats = new Set();
   for (const r of rawData){
-    if (fPeriodo && !(r.periodo || '').includes(fPeriodo)) continue;
+    const p = r.periodo || '';
+    if (fPeriodoIni && p < fPeriodoIni) continue;
+    if (fPeriodoFim && p > fPeriodoFim) continue;
     if (fOrigem && r.sped_origem !== fOrigem) continue;
     if (fReg && r.registro !== fReg) continue;
     if (fSit && r.sentido !== fSit) continue;
@@ -2355,7 +2364,8 @@ function updateNatBcCredOptions(){
 
 function applyFilters(){
   updateNatBcCredOptions();
-  const fPeriodo = els.filterPeriodo.value.trim();
+  const fPeriodoIni = els.filterPeriodoIni.value;
+  const fPeriodoFim = els.filterPeriodoFim.value;
   const fOrigem = els.filterOrigem.value;
   const fSit = els.filterSituacao.value;
   const fReg = els.filterRegistro.value;
@@ -2364,7 +2374,9 @@ function applyFilters(){
   const fNat = els.filterNatBcCred.value.trim().toLowerCase();
   const fCnpj = els.filterCnpj.value.trim().toLowerCase();
   filteredData = rawData.filter(r => {
-    if (fPeriodo && !(r.periodo || '').includes(fPeriodo)) return false;
+    const p = r.periodo || '';
+    if (fPeriodoIni && p < fPeriodoIni) return false;
+    if (fPeriodoFim && p > fPeriodoFim) return false;
     if (fOrigem && r.sped_origem !== fOrigem) return false;
     if (fReg && r.registro !== fReg) return false;
     if (fSit && r.sentido !== fSit) return false;
@@ -2942,12 +2954,13 @@ els.filterOrigem.addEventListener('change', () => {
   applyFilters();
 });
 
-[els.filterRegistro, els.filterSituacao].forEach(s => s.addEventListener('change', applyFilters));
-[els.filterPeriodo, els.filterCfop, els.filterCst, els.filterNatBcCred, els.filterCnpj].forEach(i => {
+[els.filterRegistro, els.filterSituacao, els.filterPeriodoIni, els.filterPeriodoFim].forEach(s => s.addEventListener('change', applyFilters));
+[els.filterCfop, els.filterCst, els.filterNatBcCred, els.filterCnpj].forEach(i => {
   let t; i.addEventListener('input', () => { clearTimeout(t); t = setTimeout(applyFilters, 200); });
 });
 els.clearFilters.addEventListener('click', () => {
-  els.filterPeriodo.value = ''; els.filterOrigem.value = '';
+  els.filterPeriodoIni.value = ''; els.filterPeriodoFim.value = '';
+  els.filterOrigem.value = '';
   els.filterSituacao.value = ''; els.filterRegistro.value = '';
   els.filterCfop.value = ''; els.filterCst.value = '';
   els.filterNatBcCred.value = ''; els.filterCnpj.value = '';
