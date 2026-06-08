@@ -2575,7 +2575,9 @@ function getUniqueCols(){
 }
 
 function initColumnFilters(){
-  if (document.getElementById('col-filter-row') || !els.theadRow.parentNode) return;
+  const existing = document.getElementById('col-filter-row');
+  if (existing) existing.remove();
+  if (!els.theadRow.parentNode) return;
   const uniq = getUniqueCols();
   const row = document.createElement('tr');
   row.id = 'col-filter-row';
