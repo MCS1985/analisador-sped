@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -677,17 +677,9 @@ FROM _sped WHERE reg = 'D705';
 -- Converte DDMMYYYY → YYYY-MM-DD antes do TRY_CAST para evitar falha de formato.
 CREATE OR REPLACE TEMP TABLE _is_fiscal AS
 SELECT filename,
-       MAX(CASE
-           WHEN reg = '0000'
-            AND LENGTH(TRIM(c04)) = 8
-            AND TRY_CAST(
-                SUBSTR(TRIM(c04),5,4) || '-' ||  -- YYYY
-                SUBSTR(TRIM(c04),3,2) || '-' ||  -- MM
-                SUBSTR(TRIM(c04),1,2)             -- DD
-                AS DATE
-            ) IS NOT NULL
-           THEN 1 ELSE 0
-       END) AS is_fiscal
+       CASE WHEN MAX(CASE WHEN reg = 'A001' THEN 1 ELSE 0 END) = 1
+            THEN 0 ELSE 1
+       END AS is_fiscal
 FROM _sped
 GROUP BY filename;
 
@@ -850,8 +842,10 @@ DATA_POOL AS (
         p0.filename                                                          AS filename,
         'Não conferido'                                                         AS st_conf
     FROM _t_a170 pa170
+    INNER JOIN _is_fiscal ft USING (filename)
     LEFT JOIN _t_a100 pa100 USING (filename, g_a100)
     LEFT JOIN _t_0000 p0    USING (filename)
+    WHERE ft.is_fiscal = 0
 
     UNION ALL
 
@@ -928,13 +922,15 @@ DATA_POOL AS (
         p0.filename                                                          AS filename,
         'Não conferido'                                                         AS st_conf
     FROM _t_c175 pc175
+    INNER JOIN _is_fiscal ft USING (filename)
     LEFT JOIN _t_c100 pc100 USING (filename, g_c100)
     LEFT JOIN _t_0000 p0    USING (filename)
+    WHERE ft.is_fiscal = 0
 
     UNION ALL
 
     /* ==========================================
-       09. CONTRIB - C180 (SAÍDAS CONSOLIDADAS)
+        09. CONTRIB - C180 (SAÍDAS CONSOLIDADAS)
        ========================================== */
     SELECT
         'CONTRIBUIÇÕES'                                                         AS sped_origem,
@@ -963,6 +959,7 @@ DATA_POOL AS (
         p0.filename                                                          AS filename,
         'Não conferido'                                                         AS st_conf
     FROM _t_c181 pc181
+    INNER JOIN _is_fiscal ft USING (filename)
     LEFT JOIN _t_0000 p0 USING (filename)
     LEFT JOIN (
         SELECT filename, g_c180, cfop, cst_cofins,
@@ -975,11 +972,12 @@ DATA_POOL AS (
        AND pc185_agr.g_c180   = pc181.g_c180
        AND pc185_agr.cfop     = pc181.cfop
        AND pc185_agr.cst_cofins = pc181.cst_pis
+    WHERE ft.is_fiscal = 0
 
     UNION ALL
 
     /* ==========================================
-       10. CONTRIB - C190 (ENTRADAS CONSOLIDADAS)
+        10. CONTRIB - C190 (ENTRADAS CONSOLIDADAS)
        ========================================== */
     SELECT
         'CONTRIBUIÇÕES'                                                         AS sped_origem,
@@ -1008,6 +1006,7 @@ DATA_POOL AS (
         p0.filename                                                          AS filename,
         'Não conferido'                                                         AS st_conf
     FROM _t_c191 pc191
+    INNER JOIN _is_fiscal ft USING (filename)
     LEFT JOIN _t_0000 p0 USING (filename)
     LEFT JOIN (
         SELECT filename, g_c190, cfop, cst_cofins,
@@ -1020,6 +1019,7 @@ DATA_POOL AS (
        AND pc195_agr.g_c190   = pc191.g_c190
        AND pc195_agr.cfop     = pc191.cfop
        AND pc195_agr.cst_cofins = pc191.cst_pis
+    WHERE ft.is_fiscal = 0
 
     UNION ALL
 
@@ -1100,12 +1100,14 @@ DATA_POOL AS (
         p0.filename                                                          AS filename,
         'Não conferido'                                                         AS st_conf
     FROM _t_c870 pc870
+    INNER JOIN _is_fiscal ft USING (filename)
     LEFT JOIN _t_0000 p0 USING (filename)
+    WHERE ft.is_fiscal = 0
 
     UNION ALL
 
     /* ==========================================
-       13. CONTRIB - D100 (ENTRADAS DE TRANSPORTES)
+        13. CONTRIB - D100 (ENTRADAS DE TRANSPORTES)
        ========================================== */
     SELECT
         'CONTRIBUIÇÕES'                                                         AS sped_origem,
@@ -1181,6 +1183,7 @@ DATA_POOL AS (
         p0.filename                                                          AS filename,
         'Não conferido'                                                         AS st_conf
     FROM _t_d200 pd200
+    INNER JOIN _is_fiscal ft USING (filename)
     LEFT JOIN _t_d201 pd201 USING (filename, g_d200)
     LEFT JOIN _t_0000 p0    USING (filename)
     LEFT JOIN (
@@ -1193,6 +1196,7 @@ DATA_POOL AS (
         ON pd205_agr.filename = pd200.filename
        AND pd205_agr.g_d200   = pd200.g_d200
        AND pd205_agr.cst_cofins = pd201.cst_pis
+    WHERE ft.is_fiscal = 0
 
     UNION ALL
 
@@ -1270,12 +1274,14 @@ DATA_POOL AS (
         p0.filename                                                          AS filename,
         'Não conferido'                                                         AS st_conf
     FROM _t_f100 pf100
+    INNER JOIN _is_fiscal ft USING (filename)
     LEFT JOIN _t_0000 p0 USING (filename)
+    WHERE ft.is_fiscal = 0
 
     UNION ALL
 
     /* ==========================================
-       17. CONTRIB - F120 (ATIVO IMOBILIZADO DEPREC.)
+        17. CONTRIB - F120 (ATIVO IMOBILIZADO DEPREC.)
        ========================================== */
     SELECT
         'CONTRIBUIÇÕES'                                                         AS sped_origem,
@@ -1301,12 +1307,14 @@ DATA_POOL AS (
         p0.filename                                                          AS filename,
         'Não conferido'                                                         AS st_conf
     FROM _t_f120 pf120
+    INNER JOIN _is_fiscal ft USING (filename)
     LEFT JOIN _t_0000 p0 USING (filename)
+    WHERE ft.is_fiscal = 0
 
     UNION ALL
 
     /* ==========================================
-       18. CONTRIB - F130 (ATIVO IMOBILIZADO AQUIS.)
+        18. CONTRIB - F130 (ATIVO IMOBILIZADO AQUIS.)
        ========================================== */
     SELECT
         'CONTRIBUIÇÕES'                                                         AS sped_origem,
@@ -1332,12 +1340,14 @@ DATA_POOL AS (
         p0.filename                                                          AS filename,
         'Não conferido'                                                         AS st_conf
     FROM _t_f130 pf130
+    INNER JOIN _is_fiscal ft USING (filename)
     LEFT JOIN _t_0000 p0 USING (filename)
+    WHERE ft.is_fiscal = 0
 
     UNION ALL
 
     /* ==========================================
-       19. CONTRIB - F150 (ESTOQUE ABERTURA)
+        19. CONTRIB - F150 (ESTOQUE ABERTURA)
        ========================================== */
     SELECT
         'CONTRIBUIÇÕES'                                                         AS sped_origem,
@@ -1363,12 +1373,14 @@ DATA_POOL AS (
         p0.filename                                                          AS filename,
         'Não conferido'                                                         AS st_conf
     FROM _t_f150 pf150
+    INNER JOIN _is_fiscal ft USING (filename)
     LEFT JOIN _t_0000 p0 USING (filename)
+    WHERE ft.is_fiscal = 0
 
     UNION ALL
 
     /* ==========================================
-       20. CONTRIB - F500 (RECEITAS PRÓPRIAS)
+        20. CONTRIB - F500 (RECEITAS PRÓPRIAS)
        ========================================== */
     SELECT
         'CONTRIBUIÇÕES'                                                         AS sped_origem,
@@ -1397,12 +1409,14 @@ DATA_POOL AS (
         p0.filename                                                          AS filename,
         'Não conferido'                                                         AS st_conf
     FROM _t_f500 pf500
+    INNER JOIN _is_fiscal ft USING (filename)
     LEFT JOIN _t_0000 p0 USING (filename)
+    WHERE ft.is_fiscal = 0
 
     UNION ALL
 
     /* ==========================================
-       21. CONTRIB - F550 (RECEITAS POR OPERAÇÃO)
+        21. CONTRIB - F550 (RECEITAS POR OPERAÇÃO)
        ========================================== */
     SELECT
         'CONTRIBUIÇÕES'                                                         AS sped_origem,
@@ -1431,12 +1445,14 @@ DATA_POOL AS (
         p0.filename                                                          AS filename,
         'Não conferido'                                                         AS st_conf
     FROM _t_f550 pf550
+    INNER JOIN _is_fiscal ft USING (filename)
     LEFT JOIN _t_0000 p0 USING (filename)
+    WHERE ft.is_fiscal = 0
 
     UNION ALL
 
     /* ==========================================
-       22. FISCAL - C170 (MERCADORIAS)
+        22. FISCAL - C170 (MERCADORIAS)
        ========================================== */
     SELECT
         'FISCAL'                                                          AS sped_origem,
