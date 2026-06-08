@@ -512,11 +512,14 @@ SELECT filename, g_c190,
 FROM _sped WHERE reg = 'C195';
 
 -- C500 (energia/água/comb. - parente C501/C505)
--- Layout SPED v3.2.2: VL_DOC=c13, VL_ICMS=c20 (consistente em v015+)
+-- Layout EFD-Contribuições: VL_DOC=c10, VL_ICMS=c11
+-- Layout EFD-Fiscal:          VL_DOC=c13, VL_ICMS=c20
 CREATE OR REPLACE TEMP TABLE _t_c500 AS
 SELECT t.filename, t.g_c500,
-       num(t.c13) AS vl_doc,
-       num(t.c20) AS vl_icms
+       num(t.c10) AS vl_doc_contrib,
+       num(t.c11) AS vl_icms_contrib,
+       num(t.c13) AS vl_doc_fiscal,
+       num(t.c20) AS vl_icms_fiscal
 FROM _sped t
 WHERE t.reg = 'C500';
 
@@ -1035,6 +1038,7 @@ DATA_POOL AS (
 
     /* ==========================================
        11. CONTRIB - C500 (ENERGIA / ÁGUA)
+       Layout EFD-Contribuições: VL_DOC=c10, VL_ICMS=c11
        ========================================== */
     SELECT
         'CONTRIBUIÇÕES'                                                         AS sped_origem,
@@ -1049,11 +1053,11 @@ DATA_POOL AS (
             SELECT cn.nat_bc_cred FROM CFOP_NAT_BC_CRED cn
             WHERE cn.cfop = '1253'
         ),'N/A')                                                                AS nat_bc_cred,
-        COALESCE(pc500.vl_doc,0)::DECIMAL(18,6)                                 AS vl_item,
+        COALESCE(pc500.vl_doc_contrib,0)::DECIMAL(18,6)                         AS vl_item,
         0::DECIMAL(18,6)                                                        AS vl_desc,
-        GREATEST(COALESCE(pc500.vl_doc,0),0)::DECIMAL(18,6)                     AS vl_liquido,
+        GREATEST(COALESCE(pc500.vl_doc_contrib,0),0)::DECIMAL(18,6)             AS vl_liquido,
         0::DECIMAL(18,6)                                                        AS vl_bc_icms,
-        COALESCE(pc500.vl_icms,0)::DECIMAL(18,6)                                AS vl_icms,
+        COALESCE(pc500.vl_icms_contrib,0)::DECIMAL(18,6)                        AS vl_icms,
         0::DECIMAL(18,6)                                                        AS vl_icms_st,
         0::DECIMAL(18,6)                                                        AS vl_ipi,
         0::DECIMAL(18,6)                                                        AS vl_iss,
@@ -1497,6 +1501,7 @@ DATA_POOL AS (
 
     /* ==========================================
        23. FISCAL - C500 (ENERGIA / ÁGUA)
+       Layout EFD-Fiscal: VL_DOC=c13, VL_ICMS=c20
        ========================================== */
     SELECT
         'FISCAL'                                                          AS sped_origem,
@@ -1511,11 +1516,11 @@ DATA_POOL AS (
             SELECT cn.nat_bc_cred FROM CFOP_NAT_BC_CRED cn
             WHERE cn.cfop = '1253'
         ),'N/A')                                                          AS nat_bc_cred,
-        COALESCE(reg_c500.vl_doc,0)::DECIMAL(18,6)                        AS vl_item,
+        COALESCE(reg_c500.vl_doc_fiscal,0)::DECIMAL(18,6)                 AS vl_item,
         0::DECIMAL(18,6)                                                  AS vl_desc,
-        GREATEST(COALESCE(reg_c500.vl_doc,0),0)::DECIMAL(18,6)            AS vl_liquido,
+        GREATEST(COALESCE(reg_c500.vl_doc_fiscal,0),0)::DECIMAL(18,6)     AS vl_liquido,
         0::DECIMAL(18,6)                                                  AS vl_bc_icms,
-        COALESCE(reg_c500.vl_icms,0)::DECIMAL(18,6)                       AS vl_icms,
+        COALESCE(reg_c500.vl_icms_fiscal,0)::DECIMAL(18,6)                AS vl_icms,
         0::DECIMAL(18,6)                                                  AS vl_icms_st,
         0::DECIMAL(18,6)                                                  AS vl_ipi,
         0::DECIMAL(18,6)                                                  AS vl_iss,
