@@ -512,8 +512,8 @@ FROM _sped WHERE reg = 'C195';
 -- C500 (energia/água/comb. - parente C501/C505)
 CREATE OR REPLACE TEMP TABLE _t_c500 AS
 SELECT filename, g_c500,
-       num(c12)  AS vl_doc,
-       num(c13)  AS vl_icms
+       num(c13)  AS vl_doc,
+       num(c20)  AS vl_icms
 FROM _sped WHERE reg = 'C500';
 
 -- C501 (PIS C500)
