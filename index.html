@@ -370,12 +370,12 @@ SELECT filename,
            WHEN LENGTH(REGEXP_REPLACE(c05,'[^0-9]','','g')) = 8 THEN TRIM(c05)
            ELSE TRIM(c07)
        END AS dt_fim,
-       CASE
-           WHEN LENGTH(REGEXP_REPLACE(c09,'[^0-9]','','g')) = 14 THEN TRIM(c09)
-           WHEN LENGTH(REGEXP_REPLACE(c07,'[^0-9]','','g')) = 14 THEN TRIM(c07)
-           WHEN LENGTH(REGEXP_REPLACE(c03,'[^0-9]','','g')) = 14 THEN TRIM(c03)
-           ELSE NULL
-       END AS cnpj
+        CASE
+            WHEN LENGTH(REGEXP_REPLACE(c07,'[^0-9]','','g')) = 14 THEN TRIM(c07)
+            WHEN LENGTH(REGEXP_REPLACE(c09,'[^0-9]','','g')) = 14 THEN TRIM(c09)
+            WHEN LENGTH(REGEXP_REPLACE(c03,'[^0-9]','','g')) = 14 THEN TRIM(c03)
+            ELSE NULL
+        END AS cnpj
 FROM _sped WHERE reg = '0000';
 
 -- A100 (parente do A170 - serviços)
@@ -679,11 +679,16 @@ SELECT filename, g_d700,
        num(c06)  AS vl_cofins
 FROM _sped WHERE reg = 'D705';
 
--- Detecta tipo do arquivo: EFD FISCAL (ICMS/IPI) tem o registro A001,
--- enquanto EFD CONTRIB (PIS/COFINS) não tem.
+-- Detecta tipo do arquivo pelo CNPJ no registro 0000:
+-- FISCAL (ICMS/IPI): CNPJ no campo 07 (c07)
+-- CONTRIB (PIS/COFINS): CNPJ no campo 09 (c09)
 CREATE OR REPLACE TEMP TABLE _is_fiscal AS
 SELECT filename,
-       MAX(CASE WHEN reg = 'A001' THEN 1 ELSE 0 END) AS is_fiscal
+       MAX(CASE
+           WHEN reg = '0000'
+            AND LENGTH(REGEXP_REPLACE(c07,'[^0-9]','','g')) = 14
+           THEN 1 ELSE 0
+       END) AS is_fiscal
 FROM _sped
 GROUP BY filename;
 
