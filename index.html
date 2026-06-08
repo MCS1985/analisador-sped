@@ -512,8 +512,8 @@ FROM _sped WHERE reg = 'C195';
 -- C500 (energia/água/comb. - parente C501/C505)
 CREATE OR REPLACE TEMP TABLE _t_c500 AS
 SELECT filename, g_c500,
-       num(c10)  AS vl_doc,
-       num(c11)  AS vl_icms
+       num(c09)  AS vl_doc,
+       num(c10)  AS vl_icms
 FROM _sped WHERE reg = 'C500';
 
 -- C501 (PIS C500)
@@ -681,7 +681,7 @@ FROM _sped WHERE reg = 'D705';
 -- Converte DDMMYYYY → YYYY-MM-DD antes do TRY_CAST para evitar falha de formato.
 CREATE OR REPLACE TEMP TABLE _is_fiscal AS
 SELECT filename,
-       CASE WHEN MAX(CASE WHEN reg = 'A001' THEN 1 ELSE 0 END) = 1
+       CASE WHEN MAX(CASE WHEN reg = '0001' THEN 1 ELSE 0 END) = 1
             THEN 1 ELSE 0
        END AS is_fiscal
 FROM _sped
