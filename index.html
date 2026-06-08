@@ -97,6 +97,7 @@ header .subtitle{color:var(--fg3);font-size:14px}
 .painel-table td.col-diff{background:rgba(214,158,46,.05)}
 .painel-table tfoot td,.painel-table .total-row{background:var(--bg3);font-weight:700;border-top:2px solid var(--border)}
 .painel-table .negative{color:var(--err);font-weight:700}
+.painel-table .opportunity{color:var(--ok);font-weight:700}
 .painel-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:12px;padding:12px;background:var(--bg3);border-radius:6px;max-width:920px;margin-left:auto;margin-right:auto}
 .painel-summary-item{display:flex;flex-direction:column;gap:2px;padding:8px;background:var(--bg2);border-radius:4px;border-left:3px solid var(--border);position:relative;cursor:help}
 .painel-summary-item.contrib{border-left-color:var(--ok)}
@@ -2728,7 +2729,7 @@ function renderPainel(){
         <td class="col-fiscal">${f ? fmtMoney(f) : '–'}</td>
         <td class="col-contrib">${co ? fmtMoney(co) : '–'}</td>
         <td class="col-contrib">${cb ? fmtMoney(cb) : '–'}</td>
-        <td class="col-diff ${di < 0 ? 'negative' : ''}">${di ? fmtMoney(di) : '–'}</td>
+        <td class="col-diff ${di < 0 ? 'opportunity' : ''}">${di ? fmtMoney(di) : '–'}</td>
       </tr>`;
     }).join('');
     return `<table class="painel-table">
@@ -2752,7 +2753,7 @@ function renderPainel(){
           <td class="col-fiscal">${fmtMoney(tFiscEntr)}</td>
           <td class="col-contrib">${fmtMoney(tContribEntr)}</td>
           <td class="col-contrib">${fmtMoney(tContribEntrBc)}</td>
-          <td class="col-diff ${diffEntrItem < 0 ? 'negative' : ''}">${fmtMoney(diffEntrItem)}</td>
+          <td class="col-diff ${diffEntrItem < 0 ? 'opportunity' : ''}">${fmtMoney(diffEntrItem)}</td>
         </tr>
       </tbody>
     </table>`;
@@ -2818,22 +2819,22 @@ function renderPainel(){
       </div>
       <div class="painel-summary-item diff">
         <span class="painel-summary-label">🟡 Diferença BC (Contrib − Fiscal)</span>
-        <span class="painel-summary-value ${diffEntrBc < 0 ? 'warn' : ''}">R$ ${fmtMoney(diffEntrBc)}</span>
+        <span class="painel-summary-value ${diffEntrBc < 0 ? 'ok' : ''}">R$ ${fmtMoney(diffEntrBc)}</span>
         <div class="painel-tooltip">
           <div class="painel-tooltip-title">Memória de cálculo</div>
           <div class="painel-tooltip-line"><span class="lbl">BC PIS/COFINS (Contrib. Entradas)</span><span class="val">R$ ${fmtMoney(tContribEntrBc)}</span></div>
           <div class="painel-tooltip-line"><span class="lbl">Vlr. Item Entradas (Fiscal)</span><span class="val">R$ ${fmtMoney(tFiscEntr)}</span></div>
-          <div class="painel-tooltip-result ${diffEntrBc < 0 ? 'warn' : ''}"><span class="lbl">= Diferença BC</span><span class="val">R$ ${fmtMoney(diffEntrBc)}</span></div>
+          <div class="painel-tooltip-result ${diffEntrBc < 0 ? 'ok' : ''}"><span class="lbl">= Diferença BC</span><span class="val">R$ ${fmtMoney(diffEntrBc)}</span></div>
         </div>
       </div>
       <div class="painel-summary-item diff">
         <span class="painel-summary-label">🟡 Oport. 2 — Créd. Insumos</span>
-        <span class="painel-summary-value ${oport2 < 0 ? 'warn' : ''}">R$ ${fmtMoney(oport2)}</span>
+        <span class="painel-summary-value ${oport2 < 0 ? 'ok' : ''}">R$ ${fmtMoney(oport2)}</span>
         <div class="painel-tooltip">
           <div class="painel-tooltip-title">Memória de cálculo</div>
           <div class="painel-tooltip-line"><span class="lbl">Diferença BC (Contrib − Fiscal)</span><span class="val">R$ ${fmtMoney(diffEntrBc)}</span></div>
           <div class="painel-tooltip-line"><span class="lbl">Alíquota (PIS 1,65% + COFINS 7,60%)</span><span class="val aliq">9,25%</span></div>
-          <div class="painel-tooltip-result ${oport2 < 0 ? 'warn' : ''}"><span class="lbl">= Oport. 2 — Créd. Insumos</span><span class="val">R$ ${fmtMoney(oport2)}</span></div>
+          <div class="painel-tooltip-result ${oport2 < 0 ? 'ok' : ''}"><span class="lbl">= Oport. 2 — Créd. Insumos</span><span class="val">R$ ${fmtMoney(oport2)}</span></div>
         </div>
       </div>
     </div>
@@ -2841,7 +2842,7 @@ function renderPainel(){
       <div class="painel-oport-label">📌 Quadro de Observações</div>
       <div class="painel-oport-value">
         ${diffEntrBc < 0
-          ? `Diferença negativa de R$ ${fmtMoney(Math.abs(diffEntrBc))} na BC — possível crédito a recuperar (× 9,25% = R$ ${fmtMoney(Math.abs(oport2))}).`
+          ? `🟢 Oportunidade: Fiscal tem R$ ${fmtMoney(Math.abs(diffEntrBc))} a mais que Contribuições na BC — possível crédito não escriturado (× 9,25% = R$ ${fmtMoney(Math.abs(oport2))}).`
           : `Sem diferença significativa na BC de entradas.`}
         <br>${tContribEntr === 0 ? '⚠️ Sem dados de Contribuições (Entradas).' : ''}
         ${tFiscEntr === 0 ? '⚠️ Sem dados de Fiscal (Entradas).' : ''}
