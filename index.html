@@ -2230,7 +2230,7 @@ async function updateFileClassification(){
     for (const r of rawData){
       const k = (r.sped_origem || '?') + '|' + (r.registro || '?');
       if (!regMap[k]) regMap[k] = { origem: r.sped_origem, registro: r.registro, n: 0, pis: 0, cof: 0 };
-      regMap[k].n += +r.qtd || 0;
+      regMap[k].n += +r.bc_pis_cof_escr || 0;
       regMap[k].pis += +r.total_pis || 0;
       regMap[k].cof += +r.total_cof || 0;
     }
@@ -2254,19 +2254,19 @@ async function updateFileClassification(){
         totais[r.origem].cof += r.cof;
       }
       let html = ` · <strong style="color:var(--accent)">${counts.fiscal} FISCAL + ${counts.contrib} CONTRIB</strong>`;
-      html += `<table class="file-summary-table"><thead><tr><th>Registro</th><th>Qtd</th><th>PIS</th><th>COFINS</th></tr></thead><tbody>`;
+      html += `<table class="file-summary-table"><thead><tr><th>Registro</th><th>BC PIS/COFINS</th><th>PIS</th><th>COFINS</th></tr></thead><tbody>`;
       let curOrigem = '';
       for (const r of regRows){
         if (r.origem !== curOrigem){
           curOrigem = r.origem;
           html += `<tr class="section"><td colspan="4">${curOrigem}</td></tr>`;
         }
-        html += `<tr><td>${escHtml(r.registro)}</td><td>${r.n.toLocaleString('pt-BR')}</td><td>${fmtMoney(r.pis)}</td><td>${fmtMoney(r.cof)}</td></tr>`;
+        html += `<tr><td>${escHtml(r.registro)}</td><td>${fmtMoney(r.n)}</td><td>${fmtMoney(r.pis)}</td><td>${fmtMoney(r.cof)}</td></tr>`;
       }
       for (const orig of ['CONTRIBUIÇÕES','FISCAL']){
         if (!totais[orig]) continue;
         const t = totais[orig];
-        html += `<tr class="total"><td>Total ${orig}</td><td>${t.n.toLocaleString('pt-BR')}</td><td>${fmtMoney(t.pis)}</td><td>${fmtMoney(t.cof)}</td></tr>`;
+        html += `<tr class="total"><td>Total ${orig}</td><td>${fmtMoney(t.n)}</td><td>${fmtMoney(t.pis)}</td><td>${fmtMoney(t.cof)}</td></tr>`;
       }
       html += `</tbody></table>`;
       if (d101Diag) html += `<div class="file-summary-diag">🔍 ${escHtml(d101Diag)}<br>🔍 ${escHtml(d105Diag)}</div>`;
@@ -2645,15 +2645,12 @@ function renderStats(){
   const totCof = src.reduce((a, r) => a + (+r.total_cof || 0), 0);
   const totItem = src.reduce((a, r) => a + (+r.total_item || 0), 0);
   const totBcEscr = src.reduce((a, r) => a + (+r.bc_pis_cof_escr || 0), 0);
-  const totBcCalc = src.reduce((a, r) => a + (+r.bc_pis_cof_calc || 0), 0);
-  const qtdReg = src.reduce((a, r) => a + (+r.qtd || 0), 0);
   const stats = [
-    { label: 'Linhas (após filtros)', value: src.length.toLocaleString('pt-BR') },
-    { label: 'Registros SPED', value: qtdReg.toLocaleString('pt-BR') },
     { label: 'Vl. bruto total', value: 'R$ ' + fmtMoney(totItem), cls: 'money' },
-    { label: 'Vl. BC PIS/COFINS calc.', value: 'R$ ' + fmtMoney(totBcCalc), cls: 'money' },
     { label: 'Vl. BC PIS/COFINS escrit.', value: 'R$ ' + fmtMoney(totBcEscr), cls: 'money' },
-    { label: 'PIS + COFINS', value: 'R$ ' + fmtMoney(totPis + totCof), cls: 'money' },
+    { label: 'Vl. PIS', value: 'R$ ' + fmtMoney(totPis), cls: 'money' },
+    { label: 'Vl. COFINS', value: 'R$ ' + fmtMoney(totCof), cls: 'money' },
+    { label: 'Vl. PIS + COFINS', value: 'R$ ' + fmtMoney(totPis + totCof), cls: 'money' },
   ];
   els.stats.innerHTML = stats.map(s =>
     `<div class="stat-card"><div class="stat-label">${s.label}</div><div class="stat-value ${s.cls||''}">${s.value}</div></div>`
@@ -2705,9 +2702,11 @@ function renderPainel(){
   const fiscalEntr = totBy(PAINEL_REGS_ENTR, 'FISCAL', 'Entrada', 'total_item');
   const contribEntrOrig = totBy(PAINEL_REGS_ENTR, 'CONTRIBUIÇÕES', 'Entrada', 'total_item');
   const contribEntrBcOrig = totBy(PAINEL_REGS_ENTR, 'CONTRIBUIÇÕES', 'Entrada', 'bc_pis_cof_escr');
+  const contribEntrPisCof = totBy(PAINEL_REGS_ENTR, 'CONTRIBUIÇÕES', 'Entrada', 'total_pis_cof');
   const fiscalSaid = totBy(PAINEL_REGS_SAID, 'FISCAL', 'Saída', 'total_item');
   const contribSaid = totBy(PAINEL_REGS_SAID, 'CONTRIBUIÇÕES', 'Saída', 'total_item');
   const contribSaidBc = totBy(PAINEL_REGS_SAID, 'CONTRIBUIÇÕES', 'Saída', 'bc_pis_cof_escr');
+  const contribSaidPisCof = totBy(PAINEL_REGS_SAID, 'CONTRIBUIÇÕES', 'Saída', 'total_pis_cof');
 
   const sumVals = (m) => Object.values(m).reduce((a, b) => a + b, 0);
   const tFiscEntr = sumVals(fiscalEntr);
@@ -2728,27 +2727,31 @@ function renderPainel(){
       const f = fiscalEntr[reg] || 0;
       const co = contribEntrOrig[reg] || 0;
       const cb = contribEntrBcOrig[reg] || 0;
+      const cp = contribEntrPisCof[reg] || 0;
       const di = co - f;
       return `<tr>
         <td>${reg}</td>
         <td class="col-fiscal">${f ? fmtMoney(f) : '–'}</td>
         <td class="col-contrib">${co ? fmtMoney(co) : '–'}</td>
         <td class="col-contrib">${cb ? fmtMoney(cb) : '–'}</td>
+        <td class="col-contrib">${cp ? fmtMoney(cp) : '–'}</td>
         <td class="col-diff ${di < 0 ? 'opportunity' : ''}">${di ? fmtMoney(di) : '–'}</td>
       </tr>`;
     }).join('');
+    const tContribEntrPisCof = sumVals(contribEntrPisCof);
     return `<table class="painel-table">
       <thead>
         <tr>
           <th rowspan="2">Registro</th>
           <th class="col-fiscal">🔵 FISCAL ENTR.</th>
-          <th colspan="2" class="col-contrib">🟢 CONTRIB. ENTR. (Origem)</th>
+          <th colspan="3" class="col-contrib">🟢 CONTRIB. ENTR. (Origem)</th>
           <th class="col-diff">🟡 Diferença (Contrib − Fiscal)</th>
         </tr>
         <tr>
           <th class="col-fiscal">Vlr. Item</th>
           <th class="col-contrib">Vlr. Item</th>
           <th class="col-contrib">BC PIS/COFINS</th>
+          <th class="col-contrib">Vlr. PIS+COFINS</th>
           <th class="col-diff">Vlr. Item</th>
         </tr>
       </thead>
@@ -2758,6 +2761,7 @@ function renderPainel(){
           <td class="col-fiscal">${fmtMoney(tFiscEntr)}</td>
           <td class="col-contrib">${fmtMoney(tContribEntr)}</td>
           <td class="col-contrib">${fmtMoney(tContribEntrBc)}</td>
+          <td class="col-contrib">${fmtMoney(tContribEntrPisCof)}</td>
           <td class="col-diff ${diffEntrItem < 0 ? 'opportunity' : ''}">${fmtMoney(diffEntrItem)}</td>
         </tr>
       </tbody>
@@ -2769,24 +2773,28 @@ function renderPainel(){
       const f = fiscalSaid[reg] || 0;
       const co = contribSaid[reg] || 0;
       const cb = contribSaidBc[reg] || 0;
+      const cp = contribSaidPisCof[reg] || 0;
       return `<tr>
         <td>${reg}</td>
         <td class="col-fiscal">${f ? fmtMoney(f) : '–'}</td>
         <td class="col-contrib">${co ? fmtMoney(co) : '–'}</td>
         <td class="col-contrib">${cb ? fmtMoney(cb) : '–'}</td>
+        <td class="col-contrib">${cp ? fmtMoney(cp) : '–'}</td>
       </tr>`;
     }).join('');
+    const tContribSaidPisCof = sumVals(contribSaidPisCof);
     return `<table class="painel-table">
       <thead>
         <tr>
           <th rowspan="2">Registro</th>
           <th class="col-fiscal">🔵 FISCAL SAÍD.</th>
-          <th colspan="2" class="col-contrib">🟢 CONTR. SAÍD.</th>
+          <th colspan="3" class="col-contrib">🟢 CONTR. SAÍD.</th>
         </tr>
         <tr>
           <th class="col-fiscal">Vlr. Item</th>
           <th class="col-contrib">Vlr. Item</th>
           <th class="col-contrib">BC PIS/COFINS</th>
+          <th class="col-contrib">Vlr. PIS+COFINS</th>
         </tr>
       </thead>
       <tbody>${rows}
@@ -2795,6 +2803,7 @@ function renderPainel(){
           <td class="col-fiscal">${fmtMoney(tFiscSaid)}</td>
           <td class="col-contrib">${fmtMoney(tContribSaid)}</td>
           <td class="col-contrib">${fmtMoney(tContribSaidBc)}</td>
+          <td class="col-contrib">${fmtMoney(tContribSaidPisCof)}</td>
         </tr>
       </tbody>
     </table>`;
