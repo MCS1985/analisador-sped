@@ -275,8 +275,10 @@ thead .summary-row td{border-top:none;border-bottom:2px solid var(--accent)}
 </div><script type="module">
 const SQL_TEMPLATE = `------------------------------------------------------------------------------
 -- 0. CONFIGURAÇÃO
-------------------------------------------------------------------------------
-SET preserve_insertion_order = true;
+-------------------------------------------------------------------------------
+SET preserve_insertion_order = false;
+SET memory_limit = '2048MB';
+SET threads = 1;
 
 -- Altere aqui se mudar a pasta dos SPEDs:
 
@@ -2176,10 +2178,10 @@ async function processFiles(files){
     const startIdx = registeredFiles.length;
     for (let i = 0; i < files.length; i++){
       const f = files[i];
-      const text = await f.text();
+      const buf = await f.arrayBuffer();
       const filePath = getFilePath(f);
       const safeName = 'sped_' + (startIdx + i) + '_' + filePath.replace(/[^A-Za-z0-9._-]/g, '_');
-      await db.registerFileText(safeName, text);
+      await db.registerFileBuffer(safeName, new Uint8Array(buf));
       registeredFiles.push(safeName);
       registeredTexts[safeName] = filePath;
       names.push(safeName);
