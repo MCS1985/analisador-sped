@@ -2754,8 +2754,8 @@ function renderPainel(){
   const contribEntrBcOrig = totBy(PAINEL_REGS_ENTR, 'CONTRIBUIÇÕES', 'Entrada', 'bc_pis_cof_escr');
   const contribEntrPisCof = totBy(PAINEL_REGS_ENTR, 'CONTRIBUIÇÕES', 'Entrada', 'total_pis_cof');
   const fiscalSaid = totBy(PAINEL_REGS_SAID, 'FISCAL', 'Saída', 'total_item');
-  const fiscalSaidDesc = totBy(PAINEL_REGS_SAID, 'FISCAL', 'Saída', 'total_desconto');
   const contribSaid = totBy(PAINEL_REGS_SAID, 'CONTRIBUIÇÕES', 'Saída', 'total_item');
+  const contribSaidDesc = totBy(PAINEL_REGS_SAID, 'CONTRIBUIÇÕES', 'Saída', 'total_desconto');
   const contribSaidBc = totBy(PAINEL_REGS_SAID, 'CONTRIBUIÇÕES', 'Saída', 'bc_pis_cof_escr');
   const contribSaidPisCof = totBy(PAINEL_REGS_SAID, 'CONTRIBUIÇÕES', 'Saída', 'total_pis_cof');
 
@@ -2764,8 +2764,8 @@ function renderPainel(){
   const tContribEntr = sumVals(contribEntrOrig);
   const tContribEntrBc = sumVals(contribEntrBcOrig);
   const tFiscSaid = sumVals(fiscalSaid);
-  const tFiscSaidDesc = sumVals(fiscalSaidDesc);
   const tContribSaid = sumVals(contribSaid);
+  const tContribSaidDesc = sumVals(contribSaidDesc);
   const tContribSaidBc = sumVals(contribSaidBc);
 
   const diffEntrItem = tFiscEntr - tContribEntr;
@@ -2821,15 +2821,15 @@ function renderPainel(){
   const renderTabelaSaid = () => {
     const rows = PAINEL_REGS_SAID.map(reg => {
       const f = fiscalSaid[reg] || 0;
-      const fd = fiscalSaidDesc[reg] || 0;
+      const cd = contribSaidDesc[reg] || 0;
       const co = contribSaid[reg] || 0;
       const cb = contribSaidBc[reg] || 0;
       const cp = contribSaidPisCof[reg] || 0;
       return `<tr>
         <td>${reg}</td>
         <td class="col-fiscal">${f ? fmtMoney(f) : '–'}</td>
-        <td class="col-fiscal">${fd ? fmtMoney(fd) : '–'}</td>
         <td class="col-contrib">${co ? fmtMoney(co) : '–'}</td>
+        <td class="col-contrib">${cd ? fmtMoney(cd) : '–'}</td>
         <td class="col-contrib">${cb ? fmtMoney(cb) : '–'}</td>
         <td class="col-contrib">${cp ? fmtMoney(cp) : '–'}</td>
       </tr>`;
@@ -2839,13 +2839,13 @@ function renderPainel(){
       <thead>
         <tr>
           <th rowspan="2">Registro</th>
-          <th colspan="2" class="col-fiscal">🔵 FISCAL SAÍD.</th>
-          <th colspan="3" class="col-contrib">🟢 CONTR. SAÍD.</th>
+          <th class="col-fiscal">🔵 FISCAL SAÍD.</th>
+          <th colspan="4" class="col-contrib">🟢 CONTR. SAÍD.</th>
         </tr>
         <tr>
           <th class="col-fiscal">Vlr. Item</th>
-          <th class="col-fiscal">Vlr. Desconto</th>
           <th class="col-contrib">Vlr. Item</th>
+          <th class="col-contrib">Vlr. Desconto</th>
           <th class="col-contrib">BC PIS/COFINS</th>
           <th class="col-contrib">Vlr. PIS+COFINS</th>
         </tr>
@@ -2854,8 +2854,8 @@ function renderPainel(){
         <tr class="total-row">
           <td>TOTAL</td>
           <td class="col-fiscal">${fmtMoney(tFiscSaid)}</td>
-          <td class="col-fiscal">${fmtMoney(tFiscSaidDesc)}</td>
           <td class="col-contrib">${fmtMoney(tContribSaid)}</td>
+          <td class="col-contrib">${fmtMoney(tContribSaidDesc)}</td>
           <td class="col-contrib">${fmtMoney(tContribSaidBc)}</td>
           <td class="col-contrib">${fmtMoney(tContribSaidPisCof)}</td>
         </tr>
