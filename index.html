@@ -91,7 +91,6 @@ header .subtitle{color:var(--fg3);font-size:14px}
 .painel-row .painel-block{flex:1;margin:0;min-width:0}
 .painel-block{max-width:920px;margin:0 auto 18px auto}
 .painel-block-title{font-size:12px;font-weight:700;letter-spacing:.5px;margin-bottom:8px;padding:6px 10px;border-radius:4px;display:flex;align-items:center;gap:8px}
-caption.painel-block-title{caption-side:top}
 .painel-block-title.entr{background:rgba(99,179,237,.15);color:var(--accent);border-left:3px solid var(--accent)}
 .painel-block-title.said{background:rgba(56,161,105,.15);color:var(--ok);border-left:3px solid var(--ok)}
 .painel-block-title .badge{font-size:10px;padding:2px 6px;border-radius:3px;background:var(--bg2);font-weight:600}
@@ -2789,7 +2788,6 @@ function renderPainel(){
     }).join('');
     const tContribEntrPisCof = sumVals(contribEntrPisCof);
     return `<table class="painel-table">
-      <caption class="painel-block-title entr">① ENTRADAS <span class="badge">Fiscal × Contribuições</span></caption>
       <thead>
         <tr>
           <th rowspan="2">Registro</th>
@@ -2834,7 +2832,6 @@ function renderPainel(){
     }).join('');
     const tContribSaidPisCof = sumVals(contribSaidPisCof);
     return `<table class="painel-table">
-      <caption class="painel-block-title said">② SAÍDAS <span class="badge">Fiscal × Contribuições</span></caption>
       <thead>
         <tr>
           <th rowspan="2">Registro</th>
@@ -2885,6 +2882,7 @@ function renderPainel(){
   body.innerHTML = `
     <div class="painel-row">
       <div class="painel-block">
+        <div class="painel-block-title entr">① ENTRADAS <span class="badge">Fiscal × Contribuições</span></div>
         ${renderTabelaEntr()}
         <div class="painel-summary" style="grid-template-columns:1fr 1fr;max-width:100%;margin-top:12px">
           <div class="painel-summary-item diff">
@@ -2922,12 +2920,20 @@ function renderPainel(){
         </div>
       </div>
       <div class="painel-block">
+        <div class="painel-block-title said">② SAÍDAS <span class="badge">Fiscal × Contribuições</span></div>
         ${renderTabelaSaid()}
       </div>
       <div class="painel-block">
         ${icmsHtml}
       </div>
     </div>`;
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.painel-block').forEach(block => {
+      const tbl = block.querySelector('.painel-table');
+      const ttl = block.querySelector('.painel-block-title');
+      if (tbl && ttl) ttl.style.width = tbl.offsetWidth + 'px';
+    });
+  });
 }
 
 document.getElementById('toggle-painel')?.addEventListener('click', () => {
