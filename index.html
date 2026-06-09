@@ -88,14 +88,15 @@ header .subtitle{color:var(--fg3);font-size:14px}
 .painel-toggle{background:var(--bg3);color:var(--fg);border:1px solid var(--border);padding:4px 10px;border-radius:4px;cursor:pointer;font-size:12px}
 .painel-toggle:hover{background:var(--accent);color:#fff}
 .painel-row{display:flex;gap:16px;justify-content:space-between;align-items:flex-start;max-width:100%;margin:0 auto 18px auto}
-.painel-row .painel-block{flex:1;margin:0;min-width:0;overflow-x:auto}
+.painel-row .painel-block{flex:1;margin:0;min-width:0}
+.painel-row .painel-block:nth-child(2){margin-left:24px}
 .painel-block{max-width:920px;margin:0 auto 18px auto}
 .painel-block-title{font-size:12px;font-weight:700;letter-spacing:.5px;margin-bottom:8px;padding:6px 10px;border-radius:4px;display:flex;align-items:center;gap:8px}
 .painel-block-title.entr{background:rgba(99,179,237,.15);color:var(--accent);border-left:3px solid var(--accent)}
 .painel-block-title.said{background:rgba(56,161,105,.15);color:var(--ok);border-left:3px solid var(--ok)}
 .painel-block-title .badge{font-size:10px;padding:2px 6px;border-radius:3px;background:var(--bg2);font-weight:600}
 .painel-table{border-collapse:collapse;font-size:11px;width:auto;margin:0 auto}
-.painel-table th,.painel-table td{padding:4px 10px;text-align:right;border-bottom:1px solid var(--border);white-space:nowrap}
+.painel-table th,.painel-table td{padding:3px 6px;text-align:right;border-bottom:1px solid var(--border);white-space:nowrap}
 .painel-table th:first-child,.painel-table td:first-child{text-align:center;font-weight:700;color:var(--fg3);background:var(--bg3);width:60px}
 .painel-table thead th{color:var(--fg3);font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.3px}
 .painel-table th.col-fiscal{background:rgba(99,179,237,.18);color:var(--accent);border-bottom:2px solid var(--accent)}
@@ -2946,17 +2947,6 @@ function renderPainel(){
         ${icmsHtml}
       </div>
     </div>`;
-  setTimeout(() => {
-    document.querySelectorAll('.painel-block').forEach(block => {
-      const tbl = block.querySelector('.painel-table');
-      const ttl = block.querySelector('.painel-block-title');
-      if (tbl && ttl) {
-        ttl.style.width = tbl.offsetWidth + 'px';
-        ttl.style.marginLeft = 'auto';
-        ttl.style.marginRight = 'auto';
-      }
-    });
-  }, 50);
 }
 
 document.getElementById('toggle-painel')?.addEventListener('click', () => {
