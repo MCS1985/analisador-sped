@@ -2927,13 +2927,17 @@ function renderPainel(){
         ${icmsHtml}
       </div>
     </div>`;
-  requestAnimationFrame(() => {
+  setTimeout(() => {
     document.querySelectorAll('.painel-block').forEach(block => {
       const tbl = block.querySelector('.painel-table');
       const ttl = block.querySelector('.painel-block-title');
-      if (tbl && ttl) ttl.style.width = tbl.offsetWidth + 'px';
+      if (tbl && ttl) {
+        ttl.style.width = tbl.offsetWidth + 'px';
+        ttl.style.marginLeft = 'auto';
+        ttl.style.marginRight = 'auto';
+      }
     });
-  });
+  }, 50);
 }
 
 document.getElementById('toggle-painel')?.addEventListener('click', () => {
