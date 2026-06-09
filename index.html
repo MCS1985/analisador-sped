@@ -2783,7 +2783,7 @@ function renderPainel(){
         <td class="col-contrib">${co ? fmtMoney(co) : '–'}</td>
         <td class="col-contrib">${cb ? fmtMoney(cb) : '–'}</td>
         <td class="col-contrib">${cp ? fmtMoney(cp) : '–'}</td>
-        <td class="col-diff ${di > 0 ? 'opportunity' : ''}">${di ? fmtMoney(di) : '–'}</td>
+        <td class="col-diff ${di > 0 ? 'opportunity' : di < 0 ? 'negative' : ''}">${di ? fmtMoney(di) : '–'}</td>
       </tr>`;
     }).join('');
     const tContribEntrPisCof = sumVals(contribEntrPisCof);
@@ -2810,7 +2810,7 @@ function renderPainel(){
           <td class="col-contrib">${fmtMoney(tContribEntr)}</td>
           <td class="col-contrib">${fmtMoney(tContribEntrBc)}</td>
           <td class="col-contrib">${fmtMoney(tContribEntrPisCof)}</td>
-          <td class="col-diff ${diffEntrItem > 0 ? 'opportunity' : ''}">${fmtMoney(diffEntrItem)}</td>
+          <td class="col-diff ${diffEntrItem > 0 ? 'opportunity' : diffEntrItem < 0 ? 'negative' : ''}">${fmtMoney(diffEntrItem)}</td>
         </tr>
       </tbody>
     </table>`;
