@@ -432,24 +432,26 @@ FROM _sped WHERE reg = 'C100';
 
 -- C170 (itens de mercadorias)
 CREATE OR REPLACE TEMP TABLE _t_c170 AS
-SELECT filename, g_c100,
-       num(c05)  AS vl_item,
-       num(c06)  AS vl_desc,
-       TRIM(c10) AS cst_icms,
-       TRIM(c11) AS cfop,
-       num(c13)  AS vl_bc_icms,
-       num(c15)  AS vl_icms,
-       num(c18)  AS vl_icms_st,
-       num(c24)  AS vl_ipi,
-       TRIM(c25) AS cst_pis,
-       num(c26)  AS vl_bc_pis,
-       num(c27)  AS aliq_pis,
-       num(c30)  AS vl_pis,
-       TRIM(c31) AS cst_cofins,
-       num(c32)  AS vl_bc_cofins,
-       num(c33)  AS aliq_cofins,
-       num(c36)  AS vl_cofins
-FROM _sped WHERE reg = 'C170';
+SELECT s.filename, s.g_c100,
+       CASE WHEN ft.is_fiscal = 1 THEN num(s.c07) ELSE num(s.c05) END AS vl_item,
+       CASE WHEN ft.is_fiscal = 1 THEN num(s.c08) ELSE num(s.c06) END AS vl_desc,
+       TRIM(s.c10) AS cst_icms,
+       TRIM(s.c11) AS cfop,
+       num(s.c13)  AS vl_bc_icms,
+       num(s.c15)  AS vl_icms,
+       num(s.c18)  AS vl_icms_st,
+       num(s.c24)  AS vl_ipi,
+       TRIM(s.c25) AS cst_pis,
+       num(s.c26)  AS vl_bc_pis,
+       num(s.c27)  AS aliq_pis,
+       num(s.c30)  AS vl_pis,
+       TRIM(s.c31) AS cst_cofins,
+       num(s.c32)  AS vl_bc_cofins,
+       num(s.c33)  AS aliq_cofins,
+       num(s.c36)  AS vl_cofins
+FROM _sped s
+INNER JOIN _is_fiscal ft USING (filename)
+WHERE s.reg = 'C170';
 
 -- C175 (vendas consumidor)
 CREATE OR REPLACE TEMP TABLE _t_c175 AS
