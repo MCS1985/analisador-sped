@@ -2766,7 +2766,6 @@ function renderPainel(){
   const diffEntrItem = tFiscEntr - tContribEntr;
   const diffEntrBc = tFiscEntr - tContribEntrBc;
   const ALIQ = 0.0925;
-  const credApurado = tContribEntrBc * ALIQ;
 
   const renderTabelaEntr = () => {
     const rows = PAINEL_REGS_ENTR.map(reg => {
@@ -2877,14 +2876,14 @@ function renderPainel(){
           <div class="painel-tooltip-result ${diffEntrBc > 0 ? 'ok' : ''}"><span class="lbl">= Diferença</span><span class="val">R$ ${fmtMoney(diffEntrBc)}</span></div>
         </div>
       </div>
-      <div class="painel-summary-item contrib">
-        <span class="painel-summary-label">🟢 Créd. Apurados (BC Orig × 9,25%)</span>
-        <span class="painel-summary-value ok">R$ ${fmtMoney(credApurado)}</span>
+      <div class="painel-summary-item diff">
+        <span class="painel-summary-label">🟡 Oportunidade (Diferença × 9,25%)</span>
+        <span class="painel-summary-value ${diffEntrBc > 0 ? 'ok' : ''}">${diffEntrBc > 0 ? 'R$ ' + fmtMoney(diffEntrBc * ALIQ) : 'Sem oportunidades'}</span>
         <div class="painel-tooltip">
           <div class="painel-tooltip-title">Memória de cálculo</div>
-          <div class="painel-tooltip-line"><span class="lbl">BC PIS/COFINS (Contrib. Entradas)</span><span class="val">R$ ${fmtMoney(tContribEntrBc)}</span></div>
+          <div class="painel-tooltip-line"><span class="lbl">Diferença (Fiscal − Contrib)</span><span class="val">R$ ${fmtMoney(diffEntrBc)}</span></div>
           <div class="painel-tooltip-line"><span class="lbl">Alíquota (PIS 1,65% + COFINS 7,60%)</span><span class="val aliq">9,25%</span></div>
-          <div class="painel-tooltip-result"><span class="lbl">= Créd. Apurados</span><span class="val">R$ ${fmtMoney(credApurado)}</span></div>
+          <div class="painel-tooltip-result ${diffEntrBc > 0 ? 'ok' : ''}"><span class="lbl">= Oportunidade</span><span class="val">${diffEntrBc > 0 ? 'R$ ' + fmtMoney(diffEntrBc * ALIQ) : 'R$ 0,00'}</span></div>
         </div>
       </div>
     </div>
