@@ -122,10 +122,12 @@ header .subtitle{color:var(--fg3);font-size:14px}
 .painel-tooltip-result{margin-top:6px;padding-top:6px;border-top:1px dashed #4a5568;display:flex;justify-content:space-between;font-weight:700}
 .painel-tooltip-result .val{color:#38a169;white-space:nowrap}
 .painel-tooltip-result.warn .val{color:#d69e2e;white-space:nowrap}
+.painel-tooltip-result.err .val{color:#e53e3e;white-space:nowrap}
 .painel-summary-label{font-size:10px;color:var(--fg3);text-transform:uppercase;letter-spacing:.3px}
 .painel-summary-value{font-size:13px;font-weight:700;color:var(--fg);font-variant-numeric:tabular-nums}
 .painel-summary-value.warn{color:var(--warn)}
 .painel-summary-value.ok{color:var(--ok)}
+.painel-summary-value.err{color:var(--err)}
 .painel-oport{background:var(--bg3);padding:10px 12px;border-radius:6px;margin-top:12px;border-left:3px solid var(--accent);max-width:920px;margin-left:auto;margin-right:auto;font-size:12px}
 .painel-oport-label{font-size:12px;color:var(--fg3);margin-bottom:4px}
 .painel-oport-value{font-size:13px;font-weight:600}
@@ -2869,22 +2871,22 @@ function renderPainel(){
     <div class="painel-summary">
       <div class="painel-summary-item diff">
         <span class="painel-summary-label">🟡 Diferença (Fiscal − Contrib.)</span>
-        <span class="painel-summary-value ${diffEntrBc > 0 ? 'ok' : ''}">R$ ${fmtMoney(diffEntrBc)}</span>
+        <span class="painel-summary-value ${diffEntrBc > 0 ? 'ok' : diffEntrBc < 0 ? 'err' : ''}">R$ ${fmtMoney(diffEntrBc)}</span>
         <div class="painel-tooltip">
           <div class="painel-tooltip-title">Memória de cálculo</div>
           <div class="painel-tooltip-line"><span class="lbl">Vlr. Item Entradas (Fiscal)</span><span class="val">R$ ${fmtMoney(tFiscEntr)}</span></div>
           <div class="painel-tooltip-line"><span class="lbl">Vlr. Item Entradas (Contrib.)</span><span class="val">R$ ${fmtMoney(tContribEntr)}</span></div>
-          <div class="painel-tooltip-result ${diffEntrBc > 0 ? 'ok' : ''}"><span class="lbl">= Diferença</span><span class="val">R$ ${fmtMoney(diffEntrBc)}</span></div>
+          <div class="painel-tooltip-result ${diffEntrBc > 0 ? 'ok' : diffEntrBc < 0 ? 'err' : ''}"><span class="lbl">= Diferença</span><span class="val">R$ ${fmtMoney(diffEntrBc)}</span></div>
         </div>
       </div>
       <div class="painel-summary-item diff">
         <span class="painel-summary-label">🟡 Oportunidade (Diferença × 9,25%)</span>
-        <span class="painel-summary-value ${diffEntrBc > 0 ? 'ok' : ''}">${diffEntrBc > 0 ? 'R$ ' + fmtMoney(diffEntrBc * ALIQ) : 'Sem oportunidades'}</span>
+        <span class="painel-summary-value ${diffEntrBc > 0 ? 'ok' : 'err'}">${diffEntrBc > 0 ? 'R$ ' + fmtMoney(diffEntrBc * ALIQ) : 'Sem oportunidades'}</span>
         <div class="painel-tooltip">
           <div class="painel-tooltip-title">Memória de cálculo</div>
           <div class="painel-tooltip-line"><span class="lbl">Diferença (Fiscal − Contrib.)</span><span class="val">R$ ${fmtMoney(diffEntrBc)}</span></div>
           <div class="painel-tooltip-line"><span class="lbl">Alíquota (PIS 1,65% + COFINS 7,60%)</span><span class="val aliq">9,25%</span></div>
-          <div class="painel-tooltip-result ${diffEntrBc > 0 ? 'ok' : ''}"><span class="lbl">= Oportunidade</span><span class="val">${diffEntrBc > 0 ? 'R$ ' + fmtMoney(diffEntrBc * ALIQ) : 'R$ 0,00'}</span></div>
+          <div class="painel-tooltip-result ${diffEntrBc > 0 ? 'ok' : 'err'}"><span class="lbl">= Oportunidade</span><span class="val">${diffEntrBc > 0 ? 'R$ ' + fmtMoney(diffEntrBc * ALIQ) : 'R$ 0,00'}</span></div>
         </div>
       </div>
     </div>
