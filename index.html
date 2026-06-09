@@ -69,10 +69,19 @@ header .subtitle{color:var(--fg3);font-size:14px}
 .actions button{padding:8px 16px;background:var(--accent);color:#fff;border:none;border-radius:6px;cursor:pointer;font:inherit;font-size:14px;font-weight:500;transition:.2s}
 .actions button:hover{background:var(--accent2)}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px}
-.stat-card{background:var(--bg2);padding:12px 14px;border-radius:8px;box-shadow:var(--shadow);border-left:4px solid var(--accent)}
+.stat-card{background:var(--bg2);padding:12px 14px;border-radius:8px;box-shadow:var(--shadow);border-left:4px solid var(--accent);position:relative;cursor:help}
 .stat-label{font-size:12px;color:var(--fg3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
 .stat-value{font-size:14px;font-weight:700;color:var(--fg);font-variant-numeric:tabular-nums}
 .stat-value.money{color:var(--ok)}
+.stat-tooltip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#1a202c;color:#f7fafc;padding:10px 14px;border-radius:6px;font-size:11px;line-height:1.6;min-width:240px;max-width:320px;opacity:0;pointer-events:none;transition:opacity .18s;z-index:50;box-shadow:0 6px 20px rgba(0,0,0,.35);white-space:normal}
+.stat-tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:6px solid transparent;border-top-color:#1a202c}
+.stat-card:hover .stat-tooltip{opacity:1}
+.stat-tooltip-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#63b3ed;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid #4a5568}
+.stat-tooltip-line{display:flex;justify-content:space-between;gap:16px;align-items:baseline}
+.stat-tooltip-line .lbl{color:#a0aec0}
+.stat-tooltip-line .val{font-variant-numeric:tabular-nums;color:#f7fafc;font-weight:600}
+.stat-tooltip-result{margin-top:6px;padding-top:6px;border-top:1px dashed #4a5568;display:flex;justify-content:space-between;font-weight:700}
+.stat-tooltip-result .val{color:#38a169}
 .painel-section{background:var(--bg2);border-radius:8px;box-shadow:var(--shadow);padding:16px;margin-bottom:16px}
 .painel-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
 .painel-header h3{margin:0;font-size:16px;color:var(--fg)}
@@ -2645,15 +2654,51 @@ function renderStats(){
   const totCof = src.reduce((a, r) => a + (+r.total_cof || 0), 0);
   const totItem = src.reduce((a, r) => a + (+r.total_item || 0), 0);
   const totBcEscr = src.reduce((a, r) => a + (+r.bc_pis_cof_escr || 0), 0);
+  const porOrigem = (campo) => {
+    const m = {};
+    for (const r of src){
+      const o = r.sped_origem || '?';
+      m[o] = (m[o] || 0) + (+r[campo] || 0);
+    }
+    return m;
+  };
+  const itemOrig = porOrigem('total_item');
+  const bcOrig = porOrigem('bc_pis_cof_escr');
+  const pisOrig = porOrigem('total_pis');
+  const cofOrig = porOrigem('total_cof');
+  const tooltip = (lines, total) =>
+    `<div class="stat-tooltip"><div class="stat-tooltip-title">Memória de cálculo</div>${lines.map(l =>
+      `<div class="stat-tooltip-line"><span class="lbl">${l.lbl}</span><span class="val">R$ ${fmtMoney(l.val)}</span></div>`
+    ).join('')}<div class="stat-tooltip-result"><span class="lbl">= Total</span><span class="val">R$ ${fmtMoney(total)}</span></div></div>`;
   const stats = [
-    { label: 'Vl. bruto total', value: 'R$ ' + fmtMoney(totItem), cls: 'money' },
-    { label: 'Vl. BC PIS/COFINS escrit.', value: 'R$ ' + fmtMoney(totBcEscr), cls: 'money' },
-    { label: 'Vl. PIS', value: 'R$ ' + fmtMoney(totPis), cls: 'money' },
-    { label: 'Vl. COFINS', value: 'R$ ' + fmtMoney(totCof), cls: 'money' },
-    { label: 'Vl. PIS + COFINS', value: 'R$ ' + fmtMoney(totPis + totCof), cls: 'money' },
+    { label: 'Vl. bruto total', value: 'R$ ' + fmtMoney(totItem), cls: 'money',
+      tip: tooltip([
+        {lbl:'Contribuições', val:itemOrig['CONTRIBUIÇÕES']||0},
+        {lbl:'Fiscal', val:itemOrig['FISCAL']||0},
+      ], totItem) },
+    { label: 'Vl. BC PIS/COFINS escrit.', value: 'R$ ' + fmtMoney(totBcEscr), cls: 'money',
+      tip: tooltip([
+        {lbl:'Contribuições', val:bcOrig['CONTRIBUIÇÕES']||0},
+        {lbl:'Fiscal', val:bcOrig['FISCAL']||0},
+      ], totBcEscr) },
+    { label: 'Vl. PIS', value: 'R$ ' + fmtMoney(totPis), cls: 'money',
+      tip: tooltip([
+        {lbl:'Contribuições', val:pisOrig['CONTRIBUIÇÕES']||0},
+        {lbl:'Fiscal', val:pisOrig['FISCAL']||0},
+      ], totPis) },
+    { label: 'Vl. COFINS', value: 'R$ ' + fmtMoney(totCof), cls: 'money',
+      tip: tooltip([
+        {lbl:'Contribuições', val:cofOrig['CONTRIBUIÇÕES']||0},
+        {lbl:'Fiscal', val:cofOrig['FISCAL']||0},
+      ], totCof) },
+    { label: 'Vl. PIS + COFINS', value: 'R$ ' + fmtMoney(totPis + totCof), cls: 'money',
+      tip: tooltip([
+        {lbl:'PIS', val:totPis},
+        {lbl:'COFINS', val:totCof},
+      ], totPis + totCof) },
   ];
   els.stats.innerHTML = stats.map(s =>
-    `<div class="stat-card"><div class="stat-label">${s.label}</div><div class="stat-value ${s.cls||''}">${s.value}</div></div>`
+    `<div class="stat-card"><div class="stat-label">${s.label}</div><div class="stat-value ${s.cls||''}">${s.value}</div>${s.tip || ''}</div>`
   ).join('');
   renderPainel();
 }
