@@ -2172,22 +2172,30 @@ async function processFiles(files){
   }
   files = toProcess;
   renderFileList(toProcess);
-  setProgress(20, `Processando ${toProcess.length} arquivo(s)...`);
+  const BATCH = 5;
+  const totalBatches = Math.ceil(files.length / BATCH);
+  setProgress(20, `Processando ${files.length} arquivo(s) em ${totalBatches} lote(s)...`);
   try {
     let allRawData = [];
     let cnpjByFilename = {};
     let isFiscalCount = { fiscal: 0, contrib: 0 };
-    for (let i = 0; i < files.length; i++){
-      const f = files[i];
-      const pct = 20 + (i / files.length) * 55;
-      setProgress(pct, `Processando ${f.name} (${i+1}/${files.length})...`);
-      const buf = await f.arrayBuffer();
-      const safeName = 'sped_' + i;
-      await db.registerFileBuffer(safeName, new Uint8Array(buf));
-      const fileList = "['" + safeName + "']";
+    for (let b = 0; b < totalBatches; b++){
+      const batchFiles = files.slice(b * BATCH, (b + 1) * BATCH);
+      const batchNames = [];
+      for (let j = 0; j < batchFiles.length; j++){
+        const f = batchFiles[j];
+        const idx = b * BATCH + j;
+        const buf = await f.arrayBuffer();
+        const safeName = 'sped_' + idx;
+        await db.registerFileBuffer(safeName, new Uint8Array(buf));
+        batchNames.push(safeName);
+        registeredTexts[safeName] = getFilePath(f);
+      }
+      const pct = 20 + ((b + 1) / totalBatches) * 55;
+      setProgress(pct, `Lote ${b+1}/${totalBatches} — ${batchFiles.map(f=>f.name).join(', ')}`);
+      const fileList = '[' + batchNames.map(n => "'" + n + "'").join(',') + ']';
       const sql = SQL_TEMPLATE.replace("getvariable('caminho_sped')", fileList);
       const result = await conn.query(sql);
-      const rows = [];
       for (const row of result.toArray()){
         const o = {};
         for (const k of Object.keys(row)){
@@ -2195,24 +2203,25 @@ async function processFiles(files){
           if (typeof v === 'bigint') v = Number(v);
           o[k] = v;
         }
-        rows.push(o);
+        allRawData.push(o);
       }
-      allRawData.push(...rows);
       try {
-        const cnpjR = await conn.query("SELECT cnpj, dt_fim FROM _t_0000");
+        const cnpjR = await conn.query("SELECT filename, cnpj, dt_fim FROM _t_0000");
         for (const row of cnpjR.toArray()){
-          if (row.cnpj) cnpjByFilename[getFilePath(f)] = { cnpj: row.cnpj, period: row.dt_fim };
+          const origName = registeredTexts[row.filename] || row.filename;
+          if (row.cnpj) cnpjByFilename[origName] = { cnpj: row.cnpj, period: row.dt_fim };
         }
       } catch(e){}
       try {
-        const fr = await conn.query("SELECT is_fiscal FROM _is_fiscal LIMIT 1");
-        if (fr.toArray().length){
-          const v = Number(fr.toArray()[0].is_fiscal);
-          if (v === 1) isFiscalCount.fiscal++; else isFiscalCount.contrib++;
+        const fr = await conn.query("SELECT is_fiscal, COUNT(*) AS n FROM _is_fiscal GROUP BY is_fiscal");
+        for (const row of fr.toArray()){
+          if (Number(row.is_fiscal) === 1) isFiscalCount.fiscal += Number(row.n);
+          else isFiscalCount.contrib += Number(row.n);
         }
       } catch(e){}
-      registeredTexts[safeName] = getFilePath(f);
-      try { await db.unregisterFile(safeName); } catch(e){}
+      for (const n of batchNames){
+        try { await db.unregisterFile(n); } catch(e){}
+      }
     }
     rawData = allRawData;
     if (rawData.length === 0){
