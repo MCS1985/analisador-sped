@@ -2902,6 +2902,35 @@ function renderPainel(){
         ${tFiscEntr === 0 ? '⚠️ Sem dados de Fiscal (Entradas).' : ''}
       </div>
     </div>
+    <div class="painel-block" style="margin-top:16px">
+      <div class="painel-block-title entr" style="background:rgba(214,158,46,.15);color:var(--warn);border-left-color:var(--warn)">③ ICMS na BC PIS/COFINS <span class="badge">C170 Saídas CST 01</span></div>
+      ${(() => {
+        const icmsRows = filteredData.filter(r => r.registro === 'C170' && r.sentido === 'Saída' && r.cst === '01');
+        if (!icmsRows.length) return '<div class="empty" style="padding:12px;font-size:12px">Nenhum registro C170 (Saída, CST 01) encontrado.</div>';
+        const tItem = icmsRows.reduce((a, r) => a + (+r.total_item || 0), 0);
+        const tDesc = icmsRows.reduce((a, r) => a + (+r.total_desconto || 0), 0);
+        const tIcms = icmsRows.reduce((a, r) => a + (+r.total_icms || 0), 0);
+        const bcAjust = tItem - tDesc - tIcms;
+        const pisCofEscrit = icmsRows.reduce((a, r) => a + (+r.total_pis || 0) + (+r.total_cof || 0), 0);
+        const pisCofAjust = bcAjust * 0.0925;
+        const oport = pisCofEscrit - pisCofAjust;
+        return `<table class="painel-table" style="margin-top:4px">
+          <thead>
+            <tr><th colspan="2" style="font-size:11px">③ ICMS na BC PIS/COFINS — C170 Saídas CST 01</th></tr>
+            <tr><th style="text-align:left;width:70%">Item</th><th style="text-align:right">Valor</th></tr>
+          </thead>
+          <tbody>
+            <tr><td style="text-align:left">Vlr. Item</td><td style="text-align:right">R$ ${fmtMoney(tItem)}</td></tr>
+            <tr><td style="text-align:left">(–) Vlr. Desconto</td><td style="text-align:right">R$ ${fmtMoney(tDesc)}</td></tr>
+            <tr><td style="text-align:left">(–) Vlr. ICMS</td><td style="text-align:right">R$ ${fmtMoney(tIcms)}</td></tr>
+            <tr class="total-row"><td style="text-align:left;font-weight:700">= BC Ajustada</td><td style="text-align:right;font-weight:700">R$ ${fmtMoney(bcAjust)}</td></tr>
+            <tr><td style="text-align:left">(–) PIS/COFINS Ajustado (BC Adj. × 9,25%)</td><td style="text-align:right">R$ ${fmtMoney(pisCofAjust)}</td></tr>
+            <tr><td style="text-align:left">(+) PIS/COFINS Escriturado</td><td style="text-align:right">R$ ${fmtMoney(pisCofEscrit)}</td></tr>
+            <tr class="total-row"><td style="text-align:left;font-weight:700;color:${oport > 0 ? 'var(--ok)' : oport < 0 ? 'var(--err)' : ''}">= Oportunidade</td><td style="text-align:right;font-weight:700;color:${oport > 0 ? 'var(--ok)' : oport < 0 ? 'var(--err)' : ''}">R$ ${fmtMoney(oport)}</td></tr>
+          </tbody>
+        </table>`;
+      })()}
+    </div>
   `;
 }
 
