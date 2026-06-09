@@ -2220,6 +2220,7 @@ async function processFiles(files){
     await updateFileClassification();
     els.results.classList.add('active');
     setProgress(100, `Concluído: ${rawData.length} linhas geradas.`);
+    setDropzoneCollapsed(true);
     setTimeout(hideProgress, 1200);
   } catch (e){
     hideProgress();
