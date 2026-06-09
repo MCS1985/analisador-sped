@@ -2767,7 +2767,6 @@ function renderPainel(){
   const diffEntrBc = tContribEntrBc - tFiscEntr;
   const ALIQ = 0.0925;
   const credApurado = tContribEntrBc * ALIQ;
-  const oport2 = diffEntrBc * ALIQ;
 
   const renderTabelaEntr = () => {
     const rows = PAINEL_REGS_ENTR.map(reg => {
@@ -2888,23 +2887,15 @@ function renderPainel(){
           <div class="painel-tooltip-result"><span class="lbl">= Créd. Apurados</span><span class="val">R$ ${fmtMoney(credApurado)}</span></div>
         </div>
       </div>
-      <div class="painel-summary-item diff">
-        <span class="painel-summary-label">🟡 Oport. 2 — Créd. Insumos</span>
-        <span class="painel-summary-value ${oport2 < 0 ? 'ok' : ''}">R$ ${fmtMoney(oport2)}</span>
-        <div class="painel-tooltip">
-          <div class="painel-tooltip-title">Memória de cálculo</div>
-          <div class="painel-tooltip-line"><span class="lbl">Diferença BC (Contrib − Fiscal)</span><span class="val">R$ ${fmtMoney(diffEntrBc)}</span></div>
-          <div class="painel-tooltip-line"><span class="lbl">Alíquota (PIS 1,65% + COFINS 7,60%)</span><span class="val aliq">9,25%</span></div>
-          <div class="painel-tooltip-result ${oport2 < 0 ? 'ok' : ''}"><span class="lbl">= Oport. 2 — Créd. Insumos</span><span class="val">R$ ${fmtMoney(oport2)}</span></div>
-        </div>
-      </div>
     </div>
     <div class="painel-oport">
       <div class="painel-oport-label">📌 Quadro de Observações</div>
       <div class="painel-oport-value">
         ${diffEntrBc < 0
-          ? `🟢 Oportunidade: Fiscal tem R$ ${fmtMoney(Math.abs(diffEntrBc))} a mais que Contribuições na BC — possível crédito não escriturado (× 9,25% = R$ ${fmtMoney(Math.abs(oport2))}).`
-          : `Sem diferença significativa na BC de entradas.`}
+          ? `🟢 Oportunidade: Fiscal tem R$ ${fmtMoney(Math.abs(diffEntrBc))} a mais que Contribuições na BC — possível crédito não escriturado.`
+          : diffEntrBc > 0
+          ? `🟡 Contribuições tem R$ ${fmtMoney(diffEntrBc)} a mais que Fiscal na BC — pode indicar diferença de classificação entre os SPEDs.`
+          : `Sem diferença na BC de entradas.`}
         <br>${tContribEntr === 0 ? '⚠️ Sem dados de Contribuições (Entradas).' : ''}
         ${tFiscEntr === 0 ? '⚠️ Sem dados de Fiscal (Entradas).' : ''}
       </div>
