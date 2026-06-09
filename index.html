@@ -91,6 +91,7 @@ header .subtitle{color:var(--fg3);font-size:14px}
 .painel-row .painel-block{flex:1;margin:0;min-width:0}
 .painel-block{max-width:920px;margin:0 auto 18px auto}
 .painel-block-title{font-size:12px;font-weight:700;letter-spacing:.5px;margin-bottom:8px;padding:6px 10px;border-radius:4px;display:flex;align-items:center;gap:8px}
+.painel-table-wrap{display:inline-block;width:auto}
 .painel-block-title.entr{background:rgba(99,179,237,.15);color:var(--accent);border-left:3px solid var(--accent)}
 .painel-block-title.said{background:rgba(56,161,105,.15);color:var(--ok);border-left:3px solid var(--ok)}
 .painel-block-title .badge{font-size:10px;padding:2px 6px;border-radius:3px;background:var(--bg2);font-weight:600}
@@ -2882,8 +2883,9 @@ function renderPainel(){
   body.innerHTML = `
     <div class="painel-row">
       <div class="painel-block">
-        <div class="painel-block-title entr">① ENTRADAS <span class="badge">Fiscal × Contribuições</span></div>
-        ${renderTabelaEntr()}
+        <div class="painel-table-wrap">
+          <div class="painel-block-title entr">① ENTRADAS <span class="badge">Fiscal × Contribuições</span></div>
+          ${renderTabelaEntr()}
         <div class="painel-summary" style="grid-template-columns:1fr 1fr;max-width:100%;margin-top:12px">
           <div class="painel-summary-item diff">
             <span class="painel-summary-label">🟡 Diferença (Fiscal − Contrib.)</span>
@@ -2918,10 +2920,13 @@ function renderPainel(){
             ${tFiscEntr === 0 ? '⚠️ Sem dados de Fiscal (Entradas).' : ''}
           </div>
         </div>
+        </div>
       </div>
       <div class="painel-block">
-        <div class="painel-block-title said">② SAÍDAS <span class="badge">Fiscal × Contribuições</span></div>
-        ${renderTabelaSaid()}
+        <div class="painel-table-wrap">
+          <div class="painel-block-title said">② SAÍDAS <span class="badge">Fiscal × Contribuições</span></div>
+          ${renderTabelaSaid()}
+        </div>
       </div>
       <div class="painel-block">
         ${icmsHtml}
