@@ -2764,7 +2764,7 @@ function renderPainel(){
   const tContribSaidBc = sumVals(contribSaidBc);
 
   const diffEntrItem = tFiscEntr - tContribEntr;
-  const diffEntrBc = tFiscEntr - tContribEntrBc;
+  const diffEntrBc = tFiscEntr - tContribEntr;
   const ALIQ = 0.0925;
 
   const renderTabelaEntr = () => {
@@ -2790,7 +2790,7 @@ function renderPainel(){
           <th rowspan="2">Registro</th>
           <th class="col-fiscal">🔵 FISCAL ENTR.</th>
           <th colspan="3" class="col-contrib">🟢 CONTRIB. ENTR. (Origem)</th>
-          <th class="col-diff">🟡 Diferença (Fiscal − Contrib)</th>
+          <th class="col-diff">🟡 Diferença (Fiscal − Contrib.)</th>
         </tr>
         <tr>
           <th class="col-fiscal">Vlr. Item</th>
@@ -2867,12 +2867,12 @@ function renderPainel(){
     </div>
     <div class="painel-summary">
       <div class="painel-summary-item diff">
-        <span class="painel-summary-label">🟡 Diferença (Fiscal − Contrib)</span>
+        <span class="painel-summary-label">🟡 Diferença (Fiscal − Contrib.)</span>
         <span class="painel-summary-value ${diffEntrBc > 0 ? 'ok' : ''}">R$ ${fmtMoney(diffEntrBc)}</span>
         <div class="painel-tooltip">
           <div class="painel-tooltip-title">Memória de cálculo</div>
           <div class="painel-tooltip-line"><span class="lbl">Vlr. Item Entradas (Fiscal)</span><span class="val">R$ ${fmtMoney(tFiscEntr)}</span></div>
-          <div class="painel-tooltip-line"><span class="lbl">BC PIS/COFINS (Contrib. Entradas)</span><span class="val">R$ ${fmtMoney(tContribEntrBc)}</span></div>
+          <div class="painel-tooltip-line"><span class="lbl">Vlr. Item Entradas (Contrib.)</span><span class="val">R$ ${fmtMoney(tContribEntr)}</span></div>
           <div class="painel-tooltip-result ${diffEntrBc > 0 ? 'ok' : ''}"><span class="lbl">= Diferença</span><span class="val">R$ ${fmtMoney(diffEntrBc)}</span></div>
         </div>
       </div>
@@ -2881,7 +2881,7 @@ function renderPainel(){
         <span class="painel-summary-value ${diffEntrBc > 0 ? 'ok' : ''}">${diffEntrBc > 0 ? 'R$ ' + fmtMoney(diffEntrBc * ALIQ) : 'Sem oportunidades'}</span>
         <div class="painel-tooltip">
           <div class="painel-tooltip-title">Memória de cálculo</div>
-          <div class="painel-tooltip-line"><span class="lbl">Diferença (Fiscal − Contrib)</span><span class="val">R$ ${fmtMoney(diffEntrBc)}</span></div>
+          <div class="painel-tooltip-line"><span class="lbl">Diferença (Fiscal − Contrib.)</span><span class="val">R$ ${fmtMoney(diffEntrBc)}</span></div>
           <div class="painel-tooltip-line"><span class="lbl">Alíquota (PIS 1,65% + COFINS 7,60%)</span><span class="val aliq">9,25%</span></div>
           <div class="painel-tooltip-result ${diffEntrBc > 0 ? 'ok' : ''}"><span class="lbl">= Oportunidade</span><span class="val">${diffEntrBc > 0 ? 'R$ ' + fmtMoney(diffEntrBc * ALIQ) : 'R$ 0,00'}</span></div>
         </div>
@@ -2891,10 +2891,10 @@ function renderPainel(){
       <div class="painel-oport-label">📌 Quadro de Observações</div>
       <div class="painel-oport-value">
         ${diffEntrBc > 0
-          ? `🟢 Oportunidade: Fiscal tem R$ ${fmtMoney(diffEntrBc)} a mais que a BC do Contribuições — possível crédito não escriturado.`
+          ? `🟢 Oportunidade: Fiscal tem R$ ${fmtMoney(diffEntrBc)} a mais que Contribuições no Vlr. Item — possível crédito não escriturado.`
           : diffEntrBc < 0
-          ? `🟡 Contribuições tem R$ ${fmtMoney(Math.abs(diffEntrBc))} a mais que Fiscal na BC — pode indicar diferença de classificação entre os SPEDs.`
-          : `Sem diferença na BC de entradas.`}
+          ? `🟡 Contribuições tem R$ ${fmtMoney(Math.abs(diffEntrBc))} a mais que Fiscal no Vlr. Item — pode indicar diferença de classificação entre os SPEDs.`
+          : `Sem diferença no Vlr. Item de entradas.`}
         <br>${tContribEntr === 0 ? '⚠️ Sem dados de Contribuições (Entradas).' : ''}
         ${tFiscEntr === 0 ? '⚠️ Sem dados de Fiscal (Entradas).' : ''}
       </div>
