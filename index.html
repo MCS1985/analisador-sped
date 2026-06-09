@@ -2763,8 +2763,8 @@ function renderPainel(){
   const tContribSaid = sumVals(contribSaid);
   const tContribSaidBc = sumVals(contribSaidBc);
 
-  const diffEntrItem = tContribEntr - tFiscEntr;
-  const diffEntrBc = tContribEntrBc - tFiscEntr;
+  const diffEntrItem = tFiscEntr - tContribEntr;
+  const diffEntrBc = tFiscEntr - tContribEntrBc;
   const ALIQ = 0.0925;
   const credApurado = tContribEntrBc * ALIQ;
 
@@ -2774,14 +2774,14 @@ function renderPainel(){
       const co = contribEntrOrig[reg] || 0;
       const cb = contribEntrBcOrig[reg] || 0;
       const cp = contribEntrPisCof[reg] || 0;
-      const di = co - f;
+      const di = f - co;
       return `<tr>
         <td>${reg}</td>
         <td class="col-fiscal">${f ? fmtMoney(f) : '–'}</td>
         <td class="col-contrib">${co ? fmtMoney(co) : '–'}</td>
         <td class="col-contrib">${cb ? fmtMoney(cb) : '–'}</td>
         <td class="col-contrib">${cp ? fmtMoney(cp) : '–'}</td>
-        <td class="col-diff ${di < 0 ? 'opportunity' : ''}">${di ? fmtMoney(di) : '–'}</td>
+        <td class="col-diff ${di > 0 ? 'opportunity' : ''}">${di ? fmtMoney(di) : '–'}</td>
       </tr>`;
     }).join('');
     const tContribEntrPisCof = sumVals(contribEntrPisCof);
@@ -2791,7 +2791,7 @@ function renderPainel(){
           <th rowspan="2">Registro</th>
           <th class="col-fiscal">🔵 FISCAL ENTR.</th>
           <th colspan="3" class="col-contrib">🟢 CONTRIB. ENTR. (Origem)</th>
-          <th class="col-diff">🟡 Diferença (Contrib − Fiscal)</th>
+          <th class="col-diff">🟡 Diferença (Fiscal − Contrib)</th>
         </tr>
         <tr>
           <th class="col-fiscal">Vlr. Item</th>
@@ -2808,7 +2808,7 @@ function renderPainel(){
           <td class="col-contrib">${fmtMoney(tContribEntr)}</td>
           <td class="col-contrib">${fmtMoney(tContribEntrBc)}</td>
           <td class="col-contrib">${fmtMoney(tContribEntrPisCof)}</td>
-          <td class="col-diff ${diffEntrItem < 0 ? 'opportunity' : ''}">${fmtMoney(diffEntrItem)}</td>
+          <td class="col-diff ${diffEntrItem > 0 ? 'opportunity' : ''}">${fmtMoney(diffEntrItem)}</td>
         </tr>
       </tbody>
     </table>`;
@@ -2868,13 +2868,13 @@ function renderPainel(){
     </div>
     <div class="painel-summary">
       <div class="painel-summary-item diff">
-        <span class="painel-summary-label">🟡 Diferença BC (Contrib − Fiscal)</span>
-        <span class="painel-summary-value ${diffEntrBc < 0 ? 'ok' : ''}">R$ ${fmtMoney(diffEntrBc)}</span>
+        <span class="painel-summary-label">🟡 Diferença (Fiscal − Contrib)</span>
+        <span class="painel-summary-value ${diffEntrBc > 0 ? 'ok' : ''}">R$ ${fmtMoney(diffEntrBc)}</span>
         <div class="painel-tooltip">
           <div class="painel-tooltip-title">Memória de cálculo</div>
-          <div class="painel-tooltip-line"><span class="lbl">BC PIS/COFINS (Contrib. Entradas)</span><span class="val">R$ ${fmtMoney(tContribEntrBc)}</span></div>
           <div class="painel-tooltip-line"><span class="lbl">Vlr. Item Entradas (Fiscal)</span><span class="val">R$ ${fmtMoney(tFiscEntr)}</span></div>
-          <div class="painel-tooltip-result ${diffEntrBc < 0 ? 'ok' : ''}"><span class="lbl">= Diferença BC</span><span class="val">R$ ${fmtMoney(diffEntrBc)}</span></div>
+          <div class="painel-tooltip-line"><span class="lbl">BC PIS/COFINS (Contrib. Entradas)</span><span class="val">R$ ${fmtMoney(tContribEntrBc)}</span></div>
+          <div class="painel-tooltip-result ${diffEntrBc > 0 ? 'ok' : ''}"><span class="lbl">= Diferença</span><span class="val">R$ ${fmtMoney(diffEntrBc)}</span></div>
         </div>
       </div>
       <div class="painel-summary-item contrib">
@@ -2891,10 +2891,10 @@ function renderPainel(){
     <div class="painel-oport">
       <div class="painel-oport-label">📌 Quadro de Observações</div>
       <div class="painel-oport-value">
-        ${diffEntrBc < 0
-          ? `🟢 Oportunidade: Fiscal tem R$ ${fmtMoney(Math.abs(diffEntrBc))} a mais que Contribuições na BC — possível crédito não escriturado.`
-          : diffEntrBc > 0
-          ? `🟡 Contribuições tem R$ ${fmtMoney(diffEntrBc)} a mais que Fiscal na BC — pode indicar diferença de classificação entre os SPEDs.`
+        ${diffEntrBc > 0
+          ? `🟢 Oportunidade: Fiscal tem R$ ${fmtMoney(diffEntrBc)} a mais que a BC do Contribuições — possível crédito não escriturado.`
+          : diffEntrBc < 0
+          ? `🟡 Contribuições tem R$ ${fmtMoney(Math.abs(diffEntrBc))} a mais que Fiscal na BC — pode indicar diferença de classificação entre os SPEDs.`
           : `Sem diferença na BC de entradas.`}
         <br>${tContribEntr === 0 ? '⚠️ Sem dados de Contribuições (Entradas).' : ''}
         ${tFiscEntr === 0 ? '⚠️ Sem dados de Fiscal (Entradas).' : ''}
