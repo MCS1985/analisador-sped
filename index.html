@@ -2172,7 +2172,7 @@ async function processFiles(files){
   }
   files = toProcess;
   renderFileList(toProcess);
-  const BATCH = 5;
+  const BATCH = 1;
   const totalBatches = Math.ceil(files.length / BATCH);
   setProgress(20, `Processando ${files.length} arquivo(s) em ${totalBatches} lote(s)...`);
   try {
