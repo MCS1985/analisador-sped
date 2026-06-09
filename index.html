@@ -2868,16 +2868,6 @@ function renderPainel(){
       </div>
     </div>
     <div class="painel-summary">
-      <div class="painel-summary-item contrib">
-        <span class="painel-summary-label">🟢 Créd. Apurados (BC Orig × 9,25%)</span>
-        <span class="painel-summary-value ok">R$ ${fmtMoney(credApurado)}</span>
-        <div class="painel-tooltip">
-          <div class="painel-tooltip-title">Memória de cálculo</div>
-          <div class="painel-tooltip-line"><span class="lbl">BC PIS/COFINS (Contrib. Entradas)</span><span class="val">R$ ${fmtMoney(tContribEntrBc)}</span></div>
-          <div class="painel-tooltip-line"><span class="lbl">Alíquota (PIS 1,65% + COFINS 7,60%)</span><span class="val aliq">9,25%</span></div>
-          <div class="painel-tooltip-result"><span class="lbl">= Créd. Apurados</span><span class="val">R$ ${fmtMoney(credApurado)}</span></div>
-        </div>
-      </div>
       <div class="painel-summary-item diff">
         <span class="painel-summary-label">🟡 Diferença BC (Contrib − Fiscal)</span>
         <span class="painel-summary-value ${diffEntrBc < 0 ? 'ok' : ''}">R$ ${fmtMoney(diffEntrBc)}</span>
@@ -2886,6 +2876,16 @@ function renderPainel(){
           <div class="painel-tooltip-line"><span class="lbl">BC PIS/COFINS (Contrib. Entradas)</span><span class="val">R$ ${fmtMoney(tContribEntrBc)}</span></div>
           <div class="painel-tooltip-line"><span class="lbl">Vlr. Item Entradas (Fiscal)</span><span class="val">R$ ${fmtMoney(tFiscEntr)}</span></div>
           <div class="painel-tooltip-result ${diffEntrBc < 0 ? 'ok' : ''}"><span class="lbl">= Diferença BC</span><span class="val">R$ ${fmtMoney(diffEntrBc)}</span></div>
+        </div>
+      </div>
+      <div class="painel-summary-item contrib">
+        <span class="painel-summary-label">🟢 Créd. Apurados (BC Orig × 9,25%)</span>
+        <span class="painel-summary-value ok">R$ ${fmtMoney(credApurado)}</span>
+        <div class="painel-tooltip">
+          <div class="painel-tooltip-title">Memória de cálculo</div>
+          <div class="painel-tooltip-line"><span class="lbl">BC PIS/COFINS (Contrib. Entradas)</span><span class="val">R$ ${fmtMoney(tContribEntrBc)}</span></div>
+          <div class="painel-tooltip-line"><span class="lbl">Alíquota (PIS 1,65% + COFINS 7,60%)</span><span class="val aliq">9,25%</span></div>
+          <div class="painel-tooltip-result"><span class="lbl">= Créd. Apurados</span><span class="val">R$ ${fmtMoney(credApurado)}</span></div>
         </div>
       </div>
       <div class="painel-summary-item diff">
