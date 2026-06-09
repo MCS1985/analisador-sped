@@ -2688,6 +2688,10 @@ function renderStats(){
       `<div class="stat-tooltip-line"><span class="lbl">${l.lbl}</span><span class="val">R$ ${fmtMoney(l.val)}</span></div>`
     ).join('')}<div class="stat-tooltip-result"><span class="lbl">= Total</span><span class="val">R$ ${fmtMoney(total)}</span></div></div>`;
   const stats = [
+    { label: 'Linhas na tabela', value: src.length.toLocaleString('pt-BR'), cls: '',
+      tip: `<div class="stat-tooltip"><div class="stat-tooltip-title">Detalhes</div><div class="stat-tooltip-line"><span class="lbl">Total</span><span class="val">${src.length.toLocaleString('pt-BR')}</span></div></div>` },
+    { label: 'Registros carregados', value: rawData.length.toLocaleString('pt-BR'), cls: '',
+      tip: `<div class="stat-tooltip"><div class="stat-tooltip-title">Detalhes</div><div class="stat-tooltip-line"><span class="lbl">Total</span><span class="val">${rawData.length.toLocaleString('pt-BR')}</span></div></div>` },
     { label: 'Vl. bruto total', value: 'R$ ' + fmtMoney(totItem), cls: 'money',
       tip: tooltip([
         {lbl:'Entrada', val:itemSent['Entrada']},
