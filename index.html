@@ -2654,18 +2654,18 @@ function renderStats(){
   const totCof = src.reduce((a, r) => a + (+r.total_cof || 0), 0);
   const totItem = src.reduce((a, r) => a + (+r.total_item || 0), 0);
   const totBcEscr = src.reduce((a, r) => a + (+r.bc_pis_cof_escr || 0), 0);
-  const porOrigem = (campo) => {
-    const m = {};
+  const porSentido = (campo) => {
+    const m = { 'Entrada': 0, 'Saída': 0 };
     for (const r of src){
-      const o = r.sped_origem || '?';
-      m[o] = (m[o] || 0) + (+r[campo] || 0);
+      const s = r.sentido || '?';
+      m[s] = (m[s] || 0) + (+r[campo] || 0);
     }
     return m;
   };
-  const itemOrig = porOrigem('total_item');
-  const bcOrig = porOrigem('bc_pis_cof_escr');
-  const pisOrig = porOrigem('total_pis');
-  const cofOrig = porOrigem('total_cof');
+  const itemSent = porSentido('total_item');
+  const bcSent = porSentido('bc_pis_cof_escr');
+  const pisSent = porSentido('total_pis');
+  const cofSent = porSentido('total_cof');
   const tooltip = (lines, total) =>
     `<div class="stat-tooltip"><div class="stat-tooltip-title">Memória de cálculo</div>${lines.map(l =>
       `<div class="stat-tooltip-line"><span class="lbl">${l.lbl}</span><span class="val">R$ ${fmtMoney(l.val)}</span></div>`
@@ -2673,28 +2673,30 @@ function renderStats(){
   const stats = [
     { label: 'Vl. bruto total', value: 'R$ ' + fmtMoney(totItem), cls: 'money',
       tip: tooltip([
-        {lbl:'Contribuições', val:itemOrig['CONTRIBUIÇÕES']||0},
-        {lbl:'Fiscal', val:itemOrig['FISCAL']||0},
+        {lbl:'Entrada', val:itemSent['Entrada']},
+        {lbl:'Saída', val:itemSent['Saída']},
       ], totItem) },
     { label: 'Vl. BC PIS/COFINS escrit.', value: 'R$ ' + fmtMoney(totBcEscr), cls: 'money',
       tip: tooltip([
-        {lbl:'Contribuições', val:bcOrig['CONTRIBUIÇÕES']||0},
-        {lbl:'Fiscal', val:bcOrig['FISCAL']||0},
+        {lbl:'Entrada', val:bcSent['Entrada']},
+        {lbl:'Saída', val:bcSent['Saída']},
       ], totBcEscr) },
     { label: 'Vl. PIS', value: 'R$ ' + fmtMoney(totPis), cls: 'money',
       tip: tooltip([
-        {lbl:'Contribuições', val:pisOrig['CONTRIBUIÇÕES']||0},
-        {lbl:'Fiscal', val:pisOrig['FISCAL']||0},
+        {lbl:'Entrada', val:pisSent['Entrada']},
+        {lbl:'Saída', val:pisSent['Saída']},
       ], totPis) },
     { label: 'Vl. COFINS', value: 'R$ ' + fmtMoney(totCof), cls: 'money',
       tip: tooltip([
-        {lbl:'Contribuições', val:cofOrig['CONTRIBUIÇÕES']||0},
-        {lbl:'Fiscal', val:cofOrig['FISCAL']||0},
+        {lbl:'Entrada', val:cofSent['Entrada']},
+        {lbl:'Saída', val:cofSent['Saída']},
       ], totCof) },
     { label: 'Vl. PIS + COFINS', value: 'R$ ' + fmtMoney(totPis + totCof), cls: 'money',
       tip: tooltip([
-        {lbl:'PIS', val:totPis},
-        {lbl:'COFINS', val:totCof},
+        {lbl:'Entrada PIS', val:pisSent['Entrada']},
+        {lbl:'Entrada COFINS', val:cofSent['Entrada']},
+        {lbl:'Saída PIS', val:pisSent['Saída']},
+        {lbl:'Saída COFINS', val:cofSent['Saída']},
       ], totPis + totCof) },
   ];
   els.stats.innerHTML = stats.map(s =>
