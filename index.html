@@ -2857,81 +2857,74 @@ function renderPainel(){
     </table>`;
   };
 
+  const icmsHtml = (() => {
+    const r = filteredData.filter(x => x.registro === 'C170' && x.sentido === 'Sa\u00edda' && x.cst === '01');
+    if (!r.length) return '<div class="empty" style="padding:12px">Nenhum registro C170 (Sa\u00edda, CST 01) encontrado.</div>';
+    const tItem = r.reduce((a, x) => a + (+x.total_item || 0), 0);
+    const tDesc = r.reduce((a, x) => a + (+x.total_desconto || 0), 0);
+    const tIcms = r.reduce((a, x) => a + (+x.total_icms || 0), 0);
+    const bc = tItem - tDesc - tIcms;
+    const pEsc = r.reduce((a, x) => a + (+x.total_pis || 0) + (+x.total_cof || 0), 0);
+    const pAdj = bc * 0.0925;
+    const op = pEsc - pAdj;
+    return '<div style="margin-top:16px;padding:12px;background:var(--bg3);border-radius:6px;border-left:3px solid var(--warn)">' +
+      '<div style="font-size:11px;font-weight:700;color:var(--warn);margin-bottom:8px;text-transform:uppercase;letter-spacing:.3px">Exclus\u00e3o do ICMS da BC PIS/COFINS (C170 Sa\u00eddas CST 01)</div>' +
+      '<table class="painel-table" style="margin:0"><tbody>' +
+      '<tr><td style="text-align:left">Vlr. Item</td><td style="text-align:right">R$ ' + fmtMoney(tItem) + '</td></tr>' +
+      '<tr><td style="text-align:left">(\u2013) Vlr. Desconto</td><td style="text-align:right">R$ ' + fmtMoney(tDesc) + '</td></tr>' +
+      '<tr><td style="text-align:left">(\u2013) Vlr. ICMS</td><td style="text-align:right">R$ ' + fmtMoney(tIcms) + '</td></tr>' +
+      '<tr class="total-row"><td style="text-align:left;font-weight:700">= BC Ajustada</td><td style="text-align:right;font-weight:700">R$ ' + fmtMoney(bc) + '</td></tr>' +
+      '<tr><td style="text-align:left">(\u2013) PIS/COFINS Ajustado (BC Adj. \u00d7 9,25%)</td><td style="text-align:right">R$ ' + fmtMoney(pAdj) + '</td></tr>' +
+      '<tr><td style="text-align:left">(+) PIS/COFINS Escriturado</td><td style="text-align:right">R$ ' + fmtMoney(pEsc) + '</td></tr>' +
+      '<tr class="total-row"><td style="text-align:left;font-weight:700;color:' + (op > 0 ? 'var(--ok)' : op < 0 ? 'var(--err)' : '') + '">= Oportunidade</td><td style="text-align:right;font-weight:700;color:' + (op > 0 ? 'var(--ok)' : op < 0 ? 'var(--err)' : '') + '">R$ ' + fmtMoney(op) + '</td></tr>' +
+      '</tbody></table></div>';
+  })();
   body.innerHTML = `
     <div class="painel-row">
       <div class="painel-block">
         <div class="painel-block-title entr">① ENTRADAS <span class="badge">Fiscal × Contribuições</span></div>
         ${renderTabelaEntr()}
+        <div class="painel-summary" style="grid-template-columns:1fr 1fr;max-width:100%;margin-top:12px">
+          <div class="painel-summary-item diff">
+            <span class="painel-summary-label">🟡 Diferença (Fiscal − Contrib.)</span>
+            <span class="painel-summary-value ${diffEntrBc > 0 ? 'ok' : diffEntrBc < 0 ? 'err' : ''}">R$ ${fmtMoney(diffEntrBc)}</span>
+            <div class="painel-tooltip">
+              <div class="painel-tooltip-title">Memória de cálculo</div>
+              <div class="painel-tooltip-line"><span class="lbl">Vlr. Item Entradas (Fiscal)</span><span class="val">R$ ${fmtMoney(tFiscEntr)}</span></div>
+              <div class="painel-tooltip-line"><span class="lbl">Vlr. Item Entradas (Contrib.)</span><span class="val">R$ ${fmtMoney(tContribEntr)}</span></div>
+              <div class="painel-tooltip-result ${diffEntrBc > 0 ? 'ok' : diffEntrBc < 0 ? 'err' : ''}"><span class="lbl">= Diferença</span><span class="val">R$ ${fmtMoney(diffEntrBc)}</span></div>
+            </div>
+          </div>
+          <div class="painel-summary-item diff">
+            <span class="painel-summary-label">🟡 Oportunidade (Diferença × 9,25%)</span>
+            <span class="painel-summary-value ${diffEntrBc > 0 ? 'ok' : 'err'}">${diffEntrBc > 0 ? 'R$ ' + fmtMoney(diffEntrBc * ALIQ) : 'Sem oportunidades'}</span>
+            <div class="painel-tooltip">
+              <div class="painel-tooltip-title">Memória de cálculo</div>
+              <div class="painel-tooltip-line"><span class="lbl">Diferença (Fiscal − Contrib.)</span><span class="val">R$ ${fmtMoney(diffEntrBc)}</span></div>
+              <div class="painel-tooltip-line"><span class="lbl">Alíquota (PIS 1,65% + COFINS 7,60%)</span><span class="val aliq">9,25%</span></div>
+              <div class="painel-tooltip-result ${diffEntrBc > 0 ? 'ok' : 'err'}"><span class="lbl">= Oportunidade</span><span class="val">${diffEntrBc > 0 ? 'R$ ' + fmtMoney(diffEntrBc * ALIQ) : 'R$ 0,00'}</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="painel-oport" style="margin-top:8px">
+          <div class="painel-oport-label">📌 Quadro de Observações</div>
+          <div class="painel-oport-value">
+            ${diffEntrBc > 0
+              ? `🟢 Oportunidade: Fiscal tem R$ ${fmtMoney(diffEntrBc)} a mais que Contribuições no Vlr. Item — possível crédito não escriturado.`
+              : diffEntrBc < 0
+              ? `🟡 Contribuições tem R$ ${fmtMoney(Math.abs(diffEntrBc))} a mais que Fiscal no Vlr. Item — pode indicar diferença de classificação entre os SPEDs.`
+              : `Sem diferença no Vlr. Item de entradas.`}
+            <br>${tContribEntr === 0 ? '⚠️ Sem dados de Contribuições (Entradas).' : ''}
+            ${tFiscEntr === 0 ? '⚠️ Sem dados de Fiscal (Entradas).' : ''}
+          </div>
+        </div>
       </div>
       <div class="painel-block">
         <div class="painel-block-title said">② SAÍDAS <span class="badge">Fiscal × Contribuições</span></div>
         ${renderTabelaSaid()}
+        ${icmsHtml}
       </div>
-    </div>
-    <div class="painel-summary">
-      <div class="painel-summary-item diff">
-        <span class="painel-summary-label">🟡 Diferença (Fiscal − Contrib.)</span>
-        <span class="painel-summary-value ${diffEntrBc > 0 ? 'ok' : diffEntrBc < 0 ? 'err' : ''}">R$ ${fmtMoney(diffEntrBc)}</span>
-        <div class="painel-tooltip">
-          <div class="painel-tooltip-title">Memória de cálculo</div>
-          <div class="painel-tooltip-line"><span class="lbl">Vlr. Item Entradas (Fiscal)</span><span class="val">R$ ${fmtMoney(tFiscEntr)}</span></div>
-          <div class="painel-tooltip-line"><span class="lbl">Vlr. Item Entradas (Contrib.)</span><span class="val">R$ ${fmtMoney(tContribEntr)}</span></div>
-          <div class="painel-tooltip-result ${diffEntrBc > 0 ? 'ok' : diffEntrBc < 0 ? 'err' : ''}"><span class="lbl">= Diferença</span><span class="val">R$ ${fmtMoney(diffEntrBc)}</span></div>
-        </div>
-      </div>
-      <div class="painel-summary-item diff">
-        <span class="painel-summary-label">🟡 Oportunidade (Diferença × 9,25%)</span>
-        <span class="painel-summary-value ${diffEntrBc > 0 ? 'ok' : 'err'}">${diffEntrBc > 0 ? 'R$ ' + fmtMoney(diffEntrBc * ALIQ) : 'Sem oportunidades'}</span>
-        <div class="painel-tooltip">
-          <div class="painel-tooltip-title">Memória de cálculo</div>
-          <div class="painel-tooltip-line"><span class="lbl">Diferença (Fiscal − Contrib.)</span><span class="val">R$ ${fmtMoney(diffEntrBc)}</span></div>
-          <div class="painel-tooltip-line"><span class="lbl">Alíquota (PIS 1,65% + COFINS 7,60%)</span><span class="val aliq">9,25%</span></div>
-          <div class="painel-tooltip-result ${diffEntrBc > 0 ? 'ok' : 'err'}"><span class="lbl">= Oportunidade</span><span class="val">${diffEntrBc > 0 ? 'R$ ' + fmtMoney(diffEntrBc * ALIQ) : 'R$ 0,00'}</span></div>
-        </div>
-      </div>
-    </div>
-    <div class="painel-oport">
-      <div class="painel-oport-label">📌 Quadro de Observações</div>
-      <div class="painel-oport-value">
-        ${diffEntrBc > 0
-          ? `🟢 Oportunidade: Fiscal tem R$ ${fmtMoney(diffEntrBc)} a mais que Contribuições no Vlr. Item — possível crédito não escriturado.`
-          : diffEntrBc < 0
-          ? `🟡 Contribuições tem R$ ${fmtMoney(Math.abs(diffEntrBc))} a mais que Fiscal no Vlr. Item — pode indicar diferença de classificação entre os SPEDs.`
-          : `Sem diferença no Vlr. Item de entradas.`}
-        <br>${tContribEntr === 0 ? '⚠️ Sem dados de Contribuições (Entradas).' : ''}
-        ${tFiscEntr === 0 ? '⚠️ Sem dados de Fiscal (Entradas).' : ''}
-      </div>
-    </div>
-    <div class="painel-block" style="margin-top:16px">
-      <div class="painel-block-title entr" style="background:rgba(214,158,46,.15);color:var(--warn);border-left-color:var(--warn)">③ ICMS na BC PIS/COFINS <span class="badge">C170 Saídas CST 01</span></div>
-      ${(() => {
-        const icmsRows = filteredData.filter(r => r.registro === 'C170' && r.sentido === 'Saída' && r.cst === '01');
-        if (!icmsRows.length) return '<div class="empty" style="padding:12px;font-size:12px">Nenhum registro C170 (Saída, CST 01) encontrado.</div>';
-        const tItem = icmsRows.reduce((a, r) => a + (+r.total_item || 0), 0);
-        const tDesc = icmsRows.reduce((a, r) => a + (+r.total_desconto || 0), 0);
-        const tIcms = icmsRows.reduce((a, r) => a + (+r.total_icms || 0), 0);
-        const bcAjust = tItem - tDesc - tIcms;
-        const pisCofEscrit = icmsRows.reduce((a, r) => a + (+r.total_pis || 0) + (+r.total_cof || 0), 0);
-        const pisCofAjust = bcAjust * 0.0925;
-        const oport = pisCofEscrit - pisCofAjust;
-        return `<table class="painel-table" style="margin-top:4px">
-          <thead>
-            <tr><th colspan="2" style="font-size:11px">③ ICMS na BC PIS/COFINS — C170 Saídas CST 01</th></tr>
-            <tr><th style="text-align:left;width:70%">Item</th><th style="text-align:right">Valor</th></tr>
-          </thead>
-          <tbody>
-            <tr><td style="text-align:left">Vlr. Item</td><td style="text-align:right">R$ ${fmtMoney(tItem)}</td></tr>
-            <tr><td style="text-align:left">(–) Vlr. Desconto</td><td style="text-align:right">R$ ${fmtMoney(tDesc)}</td></tr>
-            <tr><td style="text-align:left">(–) Vlr. ICMS</td><td style="text-align:right">R$ ${fmtMoney(tIcms)}</td></tr>
-            <tr class="total-row"><td style="text-align:left;font-weight:700">= BC Ajustada</td><td style="text-align:right;font-weight:700">R$ ${fmtMoney(bcAjust)}</td></tr>
-            <tr><td style="text-align:left">(–) PIS/COFINS Ajustado (BC Adj. × 9,25%)</td><td style="text-align:right">R$ ${fmtMoney(pisCofAjust)}</td></tr>
-            <tr><td style="text-align:left">(+) PIS/COFINS Escriturado</td><td style="text-align:right">R$ ${fmtMoney(pisCofEscrit)}</td></tr>
-            <tr class="total-row"><td style="text-align:left;font-weight:700;color:${oport > 0 ? 'var(--ok)' : oport < 0 ? 'var(--err)' : ''}">= Oportunidade</td><td style="text-align:right;font-weight:700;color:${oport > 0 ? 'var(--ok)' : oport < 0 ? 'var(--err)' : ''}">R$ ${fmtMoney(oport)}</td></tr>
-          </tbody>
-        </table>`;
-      })()}
-    </div>
-  `;
+    </div>`;
 }
 
 document.getElementById('toggle-painel')?.addEventListener('click', () => {
