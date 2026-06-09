@@ -2921,10 +2921,10 @@ function renderPainel(){
       </div>
       <div class="painel-block">
         <div class="painel-block-title said">② SAÍDAS <span class="badge">Fiscal × Contribuições</span></div>
-        <div style="display:flex;gap:16px;align-items:flex-start">
-          <div style="flex:1">${renderTabelaSaid()}</div>
-          <div style="flex:1">${icmsHtml}</div>
-        </div>
+        ${renderTabelaSaid()}
+      </div>
+      <div class="painel-block">
+        ${icmsHtml}
       </div>
     </div>`;
 }
