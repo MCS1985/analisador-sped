@@ -430,8 +430,8 @@ FROM _sped WHERE reg = 'C100';
 -- C170 (itens de mercadorias)
 CREATE OR REPLACE TEMP TABLE _t_c170 AS
 SELECT filename, g_c100,
-       num(c07)  AS vl_item,
-       num(c08)  AS vl_desc,
+       num(c05)  AS vl_item,
+       num(c06)  AS vl_desc,
        TRIM(c10) AS cst_icms,
        TRIM(c11) AS cfop,
        num(c13)  AS vl_bc_icms,
